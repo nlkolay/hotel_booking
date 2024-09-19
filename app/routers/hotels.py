@@ -1,0 +1,20 @@
+from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.dao import HotelDAO
+from app.dependencies import get_db
+from app.schemas import HotelResponse, RoomResponse
+from typing import List
+
+router = APIRouter()
+
+@router.get("/", response_model=List[HotelResponse])
+async def list_hotels(db: AsyncSession = Depends(get_db)):
+    hotel_dao = HotelDAO(db)
+    hotels = await hotel_dao.get_hotels()
+    return hotels
+
+@router.get("/{hotel_id}/", response_model=List[HotelResponse])
+async def get_hotel(hotel_id: int, db: AsyncSession = Depends(get_db)):
+    hotel_dao = HotelDAO(db)
+    hotel = await hotel_dao.get_hotel_by_id(hotel_id)
+    return hotel

@@ -1,0 +1,12 @@
+fastapi~=0.115.0
+uvicorn
+sqlalchemy[asyncio]~=2.0.35
+asyncpg
+pydantic~=2.9.2
+python-jose~=3.3.0
+email-validator
+alembic~=1.13.2
+
+email_validator~=2.2.0
+passlib~=1.7.4
+python-dotenv~=1.0.1
