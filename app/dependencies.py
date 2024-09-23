@@ -1,3 +1,6 @@
+#В этом файле содержатся зависимости и вспомогательные функции, такие как функции для аутентификации пользователей,
+# создание JWT токенов и валидация токенов. Эти функции используются для защиты маршрутов и аутентификации.
+
 from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt

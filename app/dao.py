@@ -1,3 +1,6 @@
+#- **`dao.py` (Data Access Object)**: Эти классы и методы обеспечивают абстракцию для выполнения запросов к базе данных.
+# Например, методы для получения пользователя по email, создания бронирования, проверки доступности номеров и т.д.
+
 from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select

@@ -1,3 +1,5 @@
+# Эндпоинты для управления бронированиями, включая создание, получение списка и удаление бронирований.
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,15 +11,17 @@ from typing import List
 
 router = APIRouter()
 
+
 @router.post("/", response_model=BookingResponse)
-async def create_booking(booking: BookingCreate, db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
+async def create_booking(booking: BookingCreate, db: AsyncSession = Depends(get_db),
+                         current_user=Depends(get_current_user)):
     booking_dao = BookingDAO(db)
 
     # Check room availability
     is_available = await booking_dao.is_room_available(booking.room_id, booking.date_from, booking.date_to)
     if not is_available:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Room is not available for the selected dates")
-
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Room is not available for the selected dates")
 
     price = await booking_dao.get_price(booking.room_id)
 
@@ -34,11 +38,13 @@ async def create_booking(booking: BookingCreate, db: AsyncSession = Depends(get_
 
     return new_booking
 
+
 @router.get("/", response_model=List[BookingResponse])
 async def list_bookings(db: AsyncSession = Depends(get_db), current_user=Depends(get_current_active_user)):
     booking_dao = BookingDAO(db)
     bookings = await booking_dao.get_bookings_by_user_id(current_user.id)
     return bookings
+
 
 @router.delete("/{booking_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_booking(booking_id: int, db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):

@@ -1,3 +1,5 @@
+#Вспомогательные функции, такие как хэширование паролей и валидация email. Эти функции помогают провести обработку данных перед сохранением их в базу данных или перед передачей клиенту.
+
 from passlib.context import CryptContext
 from email_validator import validate_email, EmailNotValidError
 

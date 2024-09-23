@@ -1,3 +1,5 @@
+# Этот файл содержит настройки проекта и валидацию переменных окружения с использованием Pydantic. Он обеспечивает централизованное место для управления конфигурацией проекта.
+
 from pydantic import Field, EmailStr, validator
 from typing import Optional
 from dotenv import load_dotenv

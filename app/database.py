@@ -1,3 +1,6 @@
+# Этот файл занимается настройкой соединения с базой данных. Он создает объект сессии и базу данных.
+# Здесь мы используем SQLAlchemy для работы с базой данных PostgreSQL.
+
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.orm import declarative_base
 import os

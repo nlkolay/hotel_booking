@@ -1,3 +1,7 @@
+#  Главный файл приложения FastAPI. Он создает экземпляр приложения, подключает роутеры и инициализирует
+#  события запуска и завершения приложения. Теперь мы используем контекстный менеджер lifespan
+#  для управления жизненным циклом приложения:
+
 from fastapi import FastAPI
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.orm import declarative_base
@@ -32,3 +36,5 @@ app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(hotels.router, prefix="/hotels", tags=["hotels"])
 app.include_router(rooms.router, prefix="/rooms", tags=["rooms"])
 app.include_router(bookings.router, prefix="/bookings", tags=["bookings"])
+
+# TODO front, cash, test, prod

@@ -1,3 +1,5 @@
+# Эндпоинты для работы с отелями, такие как получение списка отелей и комнат в отеле.
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.dao import HotelDAO
