@@ -2,10 +2,11 @@
 # Например, методы для получения пользователя по email, создания бронирования, проверки доступности номеров и т.д.
 
 from typing import List, Optional
+from sqlalchemy import exists, join, select, func, and_
+from sqlalchemy.orm import Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
 from app.models import Users, Hotels, Rooms, Bookings
-from datetime import date
+from datetime import date, datetime
 
 class UserDAO:
     def __init__(self, session: AsyncSession):
@@ -37,7 +38,48 @@ class HotelDAO:
         result = await self.session.execute(query)
         return result.scalars().all()
 
+    async def search_for_hotels(self, location: str, date_from: datetime.date, date_to: datetime.date) -> List[Hotels]: 
+        """
+        Асинхронно возвращает список отелей в указанном местоположении с доступными номерами на указанные даты.
+
+        :param location: Местоположение отеля
+        :param date_from: Дата начала периода поиска свободных номеров (в формате 'YYYY-MM-DD')
+        :param date_to: Дата окончания периода поиска свободных номеров (в формате 'YYYY-MM-DD')
+        :return: Список отелей, где есть доступные номера на указанные даты
+        """
+        
+        async with self.session.begin():
+            # Подготовим подзапрос для поиска свободных номеров
+            free_rooms_subquery = (
+                select(Rooms.hotel_id)
+                .join(Bookings, Rooms.id == Bookings.room_id, isouter=True)
+                .filter(
+                    (Bookings.id == None) |
+                    (Bookings.date_from >= date_to) |
+                    (Bookings.date_to <= date_from)
+                )
+                .group_by(Rooms.hotel_id)
+                .subquery()
+            )
+
+            # Основной запрос для получения отелей с доступными номерами и заданным местоположением
+            query = (
+                select(Hotels)
+                .filter(Hotels.location.like(f'%{location}%'))
+                .filter(Hotels.id.in_(select(free_rooms_subquery.c.hotel_id)))
+            )
+
+            result = await self.session.execute(query)
+            hotels = result.scalars().all()
+
+        return hotels
+
     async def get_rooms_by_hotel_id(self, hotel_id: int) -> List[Rooms]:
+        query = select(Rooms).where(Rooms.hotel_id == hotel_id)
+        result = await self.session.execute(query)
+        return result.scalars().all()
+
+    async def search_for_rooms(self, hotel_id: int) -> List[Rooms]: #
         query = select(Rooms).where(Rooms.hotel_id == hotel_id)
         result = await self.session.execute(query)
         return result.scalars().all()

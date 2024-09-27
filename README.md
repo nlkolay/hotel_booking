@@ -2,6 +2,8 @@
 
 An asynchronous FastAPI application for hotel room booking using PostgreSQL, Pydantic, SQLAlchemy, and JWT authentication.
 
+uvicorn app.main:app --reload
+
 для чего нужен каждый из файлов 
 
     всем здравствуйте. Можно вкратце написать и объяснить что мы пишем в каждом файле в курсе.
