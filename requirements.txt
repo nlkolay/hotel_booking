@@ -7,7 +7,7 @@ pydantic~=2.9.2
 python-jose~=3.3.0
 email-validator
 alembic~=1.13.2
-
+python-multipart~=0.0.12
 email_validator~=2.2.0
 passlib~=1.7.4
 python-dotenv~=1.0.1

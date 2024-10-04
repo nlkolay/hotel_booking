@@ -6,6 +6,17 @@
     <title>Bronenosets</title>
 </head>
 <body>
-    Hello, world!
+    <div class="main">
+        {% for hotel in hotels %}
+        <div style="display: flex; margin-bottom: 10px;">
+            <img src="{{ url_for('static', path='images/' + hotel.image_id|string + '.webp')}}" 
+            alt="Hotel photo" width="400">
+            <div style="display:block; margin-left: 10px;">
+                <h1>{{hotel.name}}</h1>
+                <h4>{{hotel.location}}</h4>
+            </div>
+        </div>
+        {% endfor %}
+    </div>    
 </body>
 </html>

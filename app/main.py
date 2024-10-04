@@ -9,22 +9,26 @@ from sqlalchemy.orm import declarative_base
 from contextlib import asynccontextmanager
 from app.routers import auth, hotels, rooms, bookings
 from app.pages.router import router as router_pages
+from app.images.router import router as router_images
 from app.config import settings
 import logging
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger('sqlalchemy.engine').setLevel(logging.DEBUG)
-logger = logging.getLogger(__name__)
+logger1 = logging.getLogger('sqlalchemy.engine')
+#logger2 = logging.getLogger(__name__)
 
 # Create a handler (e.g., to write logs to a file)
 handler = logging.FileHandler("my_app.log")
 handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
 
 # Add the handler to the logger
-logger.addHandler(handler)
+logger1.addHandler(handler)
+#logger2.addHandler(handler)
 
 # Database setup
 DATABASE_URL = settings.DATABASE_URL
@@ -34,12 +38,12 @@ Base = declarative_base()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("Starting up...")
+    logger1.info("Starting up...")
     # Create database tables
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield
-    logger.info("Shutting down...")
+    logger1.info("Shutting down...")
     # Proper shutdown logic if needed (like closing connections)
 
 app = FastAPI(lifespan=lifespan)
@@ -52,11 +56,17 @@ app.add_middleware(
 CORSMiddleware,
 allow_origins=origins,
 allow_credentials=True,
-allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
-allow_headers=["*"],  # Allow all headers
+allow_methods=["GET", 'POST', 'OPTIONS', 'DELETE', 'PATCH', 'PUT'],  # Allow methods (GET, POST, etc.)
+allow_headers=["Content-Type", 'Set-Cookie', 'Access-Control-Allow-Headers', 
+               'Access-Control-Allow-Origins', 'Authorization'],  # Allow headers
 )
 
-# Ломает респонзы!!!!
+# pics
+
+app.mount('/static', StaticFiles(directory='app/static'), 'static')
+
+# Ломает респонзы to front !!!!
+# responses debug logger
 
 # @app.middleware("http")
 # async def log_requests(request: Request, call_next):
@@ -84,6 +94,7 @@ app.include_router(bookings.router, prefix="/bookings", tags=["bookings"])
 
 #Frontend routers
 app.include_router(router_pages)
+app.include_router(router_images)
 
 # TODO front, cash, test, prod
 

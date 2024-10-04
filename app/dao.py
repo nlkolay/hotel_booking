@@ -2,7 +2,7 @@
 # Например, методы для получения пользователя по email, создания бронирования, проверки доступности номеров и т.д.
 
 from typing import List, Optional
-from sqlalchemy import exists, join, select, func, and_
+from sqlalchemy import exists, join, label, null, select, func, and_
 from sqlalchemy.orm import Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import Users, Hotels, Rooms, Bookings
@@ -38,7 +38,7 @@ class HotelDAO:
         result = await self.session.execute(query)
         return result.scalars().all()
 
-    async def search_for_hotels(self, location: str, date_from: datetime.date, date_to: datetime.date) -> List[Hotels]: 
+    async def search_for_hotels(self, location: str, date_from: date, date_to: date) -> List[Hotels]: 
         """
         Асинхронно возвращает список отелей в указанном местоположении с доступными номерами на указанные даты.
 
@@ -47,30 +47,50 @@ class HotelDAO:
         :param date_to: Дата окончания периода поиска свободных номеров (в формате 'YYYY-MM-DD')
         :return: Список отелей, где есть доступные номера на указанные даты
         """
-        
-        async with self.session.begin():
-            # Подготовим подзапрос для поиска свободных номеров
-            free_rooms_subquery = (
-                select(Rooms.hotel_id)
-                .join(Bookings, Rooms.id == Bookings.room_id, isouter=True)
-                .filter(
-                    (Bookings.id == None) |
-                    (Bookings.date_from >= date_to) |
-                    (Bookings.date_to <= date_from)
+        #async with self.session.begin():
+        # Подготовим подзапрос для поиска свободных номеров
+        booked_rooms_cte = (
+            select(
+                Bookings.room_id, 
+                func.count().label('booked_count')
                 )
-                .group_by(Rooms.hotel_id)
-                .subquery()
+            .where(
+                (
+                (Bookings.date_from >= date_from) &
+                (Bookings.date_from <= date_to)
+                ) |
+                (
+                (Bookings.date_from <= date_from) &
+                (Bookings.date_to > date_from)
+                )
+                )
+            .group_by(Bookings.room_id)
+            .cte("booked_rooms")
+        )
+        free_rooms_subquery = (
+            select(Rooms.hotel_id)
+            .join(booked_rooms_cte, Rooms.id == booked_rooms_cte.c.room_id, isouter=True)
+            .where(
+                    (booked_rooms_cte.c.booked_count.is_(None)) |
+                    (Rooms.quantity > booked_rooms_cte.c.booked_count)
             )
+            .cte('free_rooms')
+        )
 
-            # Основной запрос для получения отелей с доступными номерами и заданным местоположением
-            query = (
-                select(Hotels)
-                .filter(Hotels.location.like(f'%{location}%'))
-                .filter(Hotels.id.in_(select(free_rooms_subquery.c.hotel_id)))
-            )
+        # Основной запрос для получения отелей с доступными номерами и заданным местоположением
+        # TODO 
+        # 1. Использование полнотекстового поиска: Для более сложных запросов можно использовать функциональность полнотекстового 
+        # поиска, если это поддерживает используемая СУБД.
+        # 2. Преобразование в нормализованную форму: Чтобы искать вне зависимости от чисел, 
+        # диакритических знаков и других вариантов написания.
+        query = (
+            select(Hotels)
+            .where(Hotels.location.ilike(f'%{location.lower()}%'))
+            .where(Hotels.id.in_(select(free_rooms_subquery.c.hotel_id)))
+        )
 
-            result = await self.session.execute(query)
-            hotels = result.scalars().all()
+        result = await self.session.execute(query)
+        hotels = result.scalars().all()
 
         return hotels
 
@@ -79,8 +99,36 @@ class HotelDAO:
         result = await self.session.execute(query)
         return result.scalars().all()
 
-    async def search_for_rooms(self, hotel_id: int) -> List[Rooms]: #
-        query = select(Rooms).where(Rooms.hotel_id == hotel_id)
+    async def search_for_rooms(self, hotel_id: int, date_from: date, date_to: date) -> List[Rooms]:
+        booked_rooms_cte = (
+            select(
+                Bookings.room_id, 
+                func.count().label('booked_count')
+                )
+            .where(
+                (
+                (Bookings.date_from >= date_from) &
+                (Bookings.date_from <= date_to)
+                ) |
+                (
+                (Bookings.date_from <= date_from) &
+                (Bookings.date_to > date_from)
+                )
+                )
+            .group_by(Bookings.room_id)
+            .cte("booked_rooms")
+        )
+        query = (
+            select(Rooms)
+            .join(booked_rooms_cte, Rooms.id == booked_rooms_cte.c.room_id, isouter=True)
+            .where(
+                (Rooms.hotel_id == hotel_id) &
+                (
+                    (booked_rooms_cte.c.booked_count.is_(None)) |
+                    (Rooms.quantity > booked_rooms_cte.c.booked_count)
+                )
+            )
+        )
         result = await self.session.execute(query)
         return result.scalars().all()
 
@@ -110,30 +158,32 @@ class BookingDAO:
         await self.session.commit()
 
     async def is_room_available(self, room_id: int, date_from: date, date_to: date) -> bool:
-        # Get the total number of rooms of this type
-        room_query = select(Rooms).where(Rooms.id == room_id)
-        room_result = await self.session.execute(room_query)
-        room = room_result.scalar_one_or_none()
-
-        if room is None:
-            return False
-
-        total_rooms = room.quantity
-
-        # Count the number of booked rooms for the given dates
-        booking_query = select(Bookings).where(
-            Bookings.room_id == room_id,
-            Bookings.date_to > date_from,
-            Bookings.date_from < date_to
+        subq = (
+            select(
+                func.count().label('booked_count')
+                )
+            .select_from(Rooms)
+            .outerjoin(Bookings, Bookings.room_id == Rooms.id)
+            .where(
+                (Bookings.room_id == room_id) &
+                (
+                (
+                (Bookings.date_from >= date_from) &
+                (Bookings.date_from <= date_to)
+                ) |
+                (
+                (Bookings.date_from <= date_from) &
+                (Bookings.date_to > date_from)
+                )
+                )
+                )
         )
-        booking_result = await self.session.execute(booking_query)
-        overlapping_bookings = booking_result.scalars().all()
-        booked_rooms = len(overlapping_bookings)
 
-        # Check if there are any rooms available
-        return booked_rooms < total_rooms
+        query = select(Rooms.quantity > subq.c.booked_count).where(Rooms.id == room_id)
+        result = await self.session.execute(query)
+        return result.scalar()
 
-    async def get_price(self, room_id: int) -> bool:
-        query = select(Rooms.price).filter_by(id=room_id)
+    async def get_price(self, room_id: int) -> int:
+        query = select(Rooms.price).where(Rooms.id == room_id)
         result = await self.session.execute(query)
         return result.scalar()

@@ -25,7 +25,7 @@ class UserResponse(BaseModel):
 @router.post("/register", response_model=Token)
 async def register(user: UserCreate, db: AsyncSession = Depends(get_db)):
     try:
-        valid = validate_email(user.email)
+        valid = validate_email(user.email, check_deliverability=False)
         email = valid.normalized
     except EmailNotValidError:
         raise HTTPException(status_code=400, detail="Invalid email")
@@ -37,8 +37,8 @@ async def register(user: UserCreate, db: AsyncSession = Depends(get_db)):
 
     hashed_password = pwd_context.hash(user.password)
     new_user = await user_dao.create_user(email, hashed_password)
-    access_token = create_access_token(data={"sub": new_user.email})
-    return {"access_token": access_token, "token_type": "bearer"}
+    #access_token = create_access_token(data={"sub": new_user.email})
+    return #{"access_token": access_token, "token_type": "bearer"}
 
 @router.post("/login", response_model=Token)
 async def login(user: UserCreate, db: AsyncSession = Depends(get_db), response: Response = None):
