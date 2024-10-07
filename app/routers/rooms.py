@@ -16,7 +16,7 @@ async def list_rooms(hotel_id: int, db: AsyncSession = Depends(get_db)) -> List[
     rooms = await hotel_dao.get_rooms_by_hotel_id(hotel_id)
     return rooms
 
-@router.get('/{hotel_id}/')
+@router.get('/{hotel_id}')
 async def get_rooms_by_time(
     hotel_id: int,
     date_from: date = Query(..., description=f'Например, {datetime.now().date()}'),

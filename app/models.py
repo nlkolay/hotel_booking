@@ -42,3 +42,10 @@ class Bookings(Base):
     price: Mapped[int] = mapped_column(Integer)
     total_cost: Mapped[int] = mapped_column(Computed("(date_to - date_from) * price"))
     total_days: Mapped[int] = mapped_column(Computed("date_to - date_from"))
+
+# class Bookings_extended(Bookings):
+#     #extend_existing=True
+#     hotel_id: Mapped[int] = mapped_column(ForeignKey("hotels.id"))
+#     hotel_name: Mapped[str] = mapped_column(ForeignKey("hotels.name"))
+#     location: Mapped[str] = mapped_column(ForeignKey("hotels.location"))
+#     room_name: Mapped[str] = mapped_column(ForeignKey("rooms.name"))

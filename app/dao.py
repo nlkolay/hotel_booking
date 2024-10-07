@@ -5,7 +5,7 @@ from typing import List, Optional
 from sqlalchemy import exists, join, label, null, select, func, and_
 from sqlalchemy.orm import Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models import Users, Hotels, Rooms, Bookings
+from app.models import  Users, Hotels, Rooms, Bookings
 from datetime import date, datetime
 
 class UserDAO:
@@ -136,11 +136,51 @@ class BookingDAO:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get_bookings_by_user_id(self, user_id: int) -> List[Bookings]:
-        query = select(Bookings).where(Bookings.user_id == user_id)
-        result = await self.session.execute(query)
-        return result.scalars().all()
+    # async def get_bookings_by_user_id(self, user_id: int):# -> List[Bookings]:
+    #     query = (
+    #         select(Bookings, Hotels.id, Hotels.name, Hotels.location, Rooms.name)
+    #         .outerjoin(Rooms, Bookings.room_id == Rooms.id)
+    #         .outerjoin(Hotels, Rooms.hotel_id == Hotels.id)
+    #         .where(Bookings.user_id == user_id)
+    #     )
+    #     result = await self.session.execute(query)
+    #     return result.scalars().all()
 
+    async def get_bookings_by_user_id(self, user_id: int) -> List[dict]:
+        query = (
+            select(
+                Bookings, Hotels, Rooms
+                )
+            .outerjoin(Rooms, Bookings.room_id == Rooms.id)
+            .outerjoin(Hotels, Rooms.hotel_id == Hotels.id)
+            .where(Bookings.user_id == user_id)
+        )
+        result = await self.session.execute(query)
+        return result.mappings().all()
+
+        # bookings = []
+        # for booking, hotel_id, hotel_name, hotel_location, room_name in result:
+        #     bookings.append(
+        #         {
+        #             "booking_id": booking.id,
+        #             "room_id": booking.room_id,
+        #             "user_id": booking.user_id,
+        #             "date_from": booking.date_from,
+        #             "date_to": booking.date_to,
+        #             "price": booking.price,
+        #             "total_cost": booking.total_cost,
+        #             "total_days": booking.total_days,
+        #             "hotel": {
+        #                 "hotel_id": hotel_id,
+        #                 "hotel_name": hotel_name,
+        #                 "hotel_location": hotel_location,
+        #             },
+        #             "room": {
+        #                 "room_name": room_name,
+        #             },
+        #         }
+        #     )
+         
     async def create_booking(self, room_id: int, user_id: int, date_from: date, date_to: date, price: int) -> Bookings:
         booking = Bookings(room_id=room_id, user_id=user_id, date_from=date_from, date_to=date_to, price=price)
         self.session.add(booking)

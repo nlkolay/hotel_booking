@@ -1,4 +1,5 @@
-# Здесь определены схемы Pydantic, которые используются для валидации данных, получаемых и отправляемых через API. Эти схемы описывают структуру данных, которая будет передаваться между клиентом и сервером.
+# Здесь определены схемы Pydantic, которые используются для валидации данных, получаемых и отправляемых через API. 
+# Эти схемы описывают структуру данных, которая будет передаваться между клиентом и сервером.
 
 from pydantic import BaseModel
 from typing import List, Optional
@@ -44,3 +45,23 @@ class BookingResponse(BaseModel):
     price: int
     total_cost: int
     total_days: int
+
+class BookingResponseExtended(BaseModel):
+    Bookings: BookingResponse
+    Hotels: HotelResponse
+    Rooms: RoomResponse
+    
+    # bookings: List[BookingResponse]
+
+    # @field_validator("bookings")
+    # def validate_bookings(cls, value):
+    #     if not isinstance(value, list):
+    #         raise ValueError("Bookings must be a list")
+    #     for booking_data in value:
+    #         if not isinstance(booking_data, dict):
+    #             raise ValueError("Each booking must be a dictionary")
+    #         if "hotel" not in booking_data or not isinstance(booking_data["hotel"], dict):
+    #             raise ValueError("Each booking must have a valid 'hotel' dictionary")
+    #         if "room" not in booking_data or not isinstance(booking_data["room"], dict):
+    #             raise ValueError("Each booking must have a valid 'room' dictionary")
+    #     return value

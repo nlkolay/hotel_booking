@@ -6,13 +6,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.dao import BookingDAO
 from app.dependencies import get_db, get_current_active_user, get_current_user
 from app.models import Bookings, Rooms
-from app.schemas import BookingCreate, BookingResponse
+from app.schemas import BookingCreate, BookingResponse, BookingResponseExtended#, BookingResponseExtended
 from typing import List
 
 router = APIRouter()
 
 
-@router.post("/", response_model=BookingResponse)
+@router.post("/create", response_model=BookingResponse)
 async def create_booking(booking: BookingCreate, db: AsyncSession = Depends(get_db),
                          current_user=Depends(get_current_user)):
     booking_dao = BookingDAO(db)
@@ -39,10 +39,15 @@ async def create_booking(booking: BookingCreate, db: AsyncSession = Depends(get_
     return new_booking
 
 
-@router.get("/", response_model=List[BookingResponse])
+@router.get("/", response_model=List[BookingResponseExtended])
 async def list_bookings(db: AsyncSession = Depends(get_db), current_user=Depends(get_current_active_user)):
     booking_dao = BookingDAO(db)
     bookings = await booking_dao.get_bookings_by_user_id(current_user.id)
+    # try:
+    #     validated_data = BookingResponseExtended(bookings=bookings)
+    #     return validated_data
+    # except ValueError as e:
+    #     raise HTTPException(status_code=400, detail=str(e))
     return bookings
 
 
