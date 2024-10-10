@@ -22,18 +22,18 @@ class UserResponse(BaseModel):
     id: int
     email: str
 
-@router.post("/register", response_model=Token)
+@router.post("/register")#, response_model=Token)
 async def register(user: UserCreate, db: AsyncSession = Depends(get_db)):
     try:
         valid = validate_email(user.email, check_deliverability=False)
         email = valid.normalized
     except EmailNotValidError:
-        raise HTTPException(status_code=400, detail="Invalid email")
+        raise HTTPException(status_code=400, detail="Некорректный e-mail.")
 
     user_dao = UserDAO(db)
     existing_user = await user_dao.get_user_by_email(email)
     if existing_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        raise HTTPException(status_code=400, detail="E-mail уже использован.")
 
     hashed_password = pwd_context.hash(user.password)
     new_user = await user_dao.create_user(email, hashed_password)
@@ -46,7 +46,7 @@ async def login(user: UserCreate, db: AsyncSession = Depends(get_db), response: 
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
+            detail="Неверные e-mail или пароль.",
         )
     access_token = create_access_token(data={"sub": user.email})
 

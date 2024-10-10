@@ -1,40 +1,47 @@
 # Эндпоинты для управления бронированиями, включая создание, получение списка и удаление бронирований.
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.dao import BookingDAO
 from app.dependencies import get_db, get_current_active_user, get_current_user
-from app.models import Bookings, Rooms
+from app.models import Bookings, Rooms, Users
 from app.schemas import BookingCreate, BookingResponse, BookingResponseExtended#, BookingResponseExtended
-from typing import List
+from typing import List, Dict
+
+from typing_extensions import TypedDict
+
+from pydantic import TypeAdapter, ValidationError
+
+from app.services import BookingService
+from app.tasks.tasks import send_booking_confirmation_email
+from app.log import logger, handler
+from app.utils import obj_to_dict
+
 
 router = APIRouter()
 
 
-@router.post("/create", response_model=BookingResponse)
-async def create_booking(booking: BookingCreate, db: AsyncSession = Depends(get_db),
-                         current_user=Depends(get_current_user)):
-    booking_dao = BookingDAO(db)
-
-    # Check room availability
-    is_available = await booking_dao.is_room_available(booking.room_id, booking.date_from, booking.date_to)
-    if not is_available:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Room is not available for the selected dates")
-
-    price = await booking_dao.get_price(booking.room_id)
-
-    new_booking = await booking_dao.create_booking(
-        room_id=booking.room_id,
-        user_id=current_user.id,
-        date_from=booking.date_from,
-        date_to=booking.date_to,
-        price=price
+@router.post("/create", status_code=201, response_model=BookingResponse)
+async def create_booking(
+    booking: BookingCreate, 
+    background_tasks: BackgroundTasks,
+    db: AsyncSession = Depends(get_db),
+    current_user: Users = Depends(get_current_user)
+    ):    
+    new_booking = await BookingService.create_booking(
+        booking,
+        background_tasks,
+        current_user,
+        db
     )
+    booking_dict = obj_to_dict(new_booking)
+    # вариант с celery
+    # send_booking_confirmation_email.delay(booking_dict, current_user.email) 
 
-    await db.commit()
-    await db.refresh(new_booking)
+    # вариант встроенный в fastapi с BackgroundTasks
+    #background_tasks.add_task(send_booking_confirmation_email, booking_dict, current_user.email)
+    # OSError: [Errno 101] Network is unreachable - 
+    # probably, port is blocked
 
     return new_booking
 

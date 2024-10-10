@@ -2,6 +2,11 @@
 #  события запуска и завершения приложения. Теперь мы используем контекстный менеджер lifespan
 #  для управления жизненным циклом приложения:
 
+# to start app:
+# uvicorn app.main:app --reload
+
+import asyncio
+from re import A
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
@@ -11,24 +16,15 @@ from app.routers import auth, hotels, rooms, bookings
 from app.pages.router import router as router_pages
 from app.images.router import router as router_images
 from app.config import settings
-import logging
+from app.log import logger, handler
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
+from fastapi_cache.decorator import cache
 
+from redis import asyncio as aioredis
 
-# Configure logging
-logging.basicConfig(level=logging.DEBUG)
-logging.getLogger('sqlalchemy.engine').setLevel(logging.DEBUG)
-logger1 = logging.getLogger('sqlalchemy.engine')
-#logger2 = logging.getLogger(__name__)
-
-# Create a handler (e.g., to write logs to a file)
-handler = logging.FileHandler("my_app.log")
-handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
-
-# Add the handler to the logger
-logger1.addHandler(handler)
-#logger2.addHandler(handler)
 
 # Database setup
 DATABASE_URL = settings.DATABASE_URL
@@ -36,17 +32,35 @@ engine = create_async_engine(DATABASE_URL, echo=True)
 AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 Base = declarative_base()
 
+# Parallel with startup :
+# async def get_cache():
+#     while True:
+#         print('start')
+#         await asyncio.sleep(3)
+#         print('end')
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger1.info("Starting up...")
+    logger.info("Starting up...")
+    # Initiate redis
+    redis = aioredis.from_url(f'redis://{settings.REDIS_HOST}:{settings.REDIS_PORT}')
+    FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
+    logger.info("Redis is ready.")
     # Create database tables
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+    #asyncio.create_task(get_cache())
+    print('starting now')
+    #
     yield
-    logger1.info("Shutting down...")
+    #
+    logger.info("Shutting down...")
     # Proper shutdown logic if needed (like closing connections)
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    title='Бронированией отелей Bronenosets',
+    lifespan=lifespan
+    )
 
 origins = [
 "http://localhost:3000",
@@ -96,7 +110,8 @@ app.include_router(bookings.router, prefix="/bookings", tags=["bookings"])
 app.include_router(router_pages)
 app.include_router(router_images)
 
-# TODO front, cash, test, prod
-
-# start app:
-# uvicorn app.main:app --reload
+# TODO 
+# +front, 
+# cash, 
+# test, 
+# prod

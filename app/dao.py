@@ -1,8 +1,8 @@
 #- **`dao.py` (Data Access Object)**: Эти классы и методы обеспечивают абстракцию для выполнения запросов к базе данных.
 # Например, методы для получения пользователя по email, создания бронирования, проверки доступности номеров и т.д.
 
-from typing import List, Optional
-from sqlalchemy import exists, join, label, null, select, func, and_
+from typing import List, Optional, Sequence
+from sqlalchemy import RowMapping, exists, join, label, null, select, func, and_
 from sqlalchemy.orm import Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import  Users, Hotels, Rooms, Bookings
@@ -28,17 +28,17 @@ class HotelDAO:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get_hotels(self) -> List[Hotels]:
+    async def get_hotels(self) -> Sequence[Hotels]:
         query = select(Hotels)
         result = await self.session.execute(query)
         return result.scalars().all()
 
-    async def get_hotel_by_id(self, hotel_id: int) -> List[Hotels]:
+    async def get_hotel_by_id(self, hotel_id: int) -> Sequence[Hotels]:
         query = select(Hotels).where(Hotels.id == hotel_id)
         result = await self.session.execute(query)
         return result.scalars().all()
 
-    async def search_for_hotels(self, location: str, date_from: date, date_to: date) -> List[Hotels]: 
+    async def search_for_hotels(self, location: str, date_from: date, date_to: date) -> Sequence[Hotels]: 
         """
         Асинхронно возвращает список отелей в указанном местоположении с доступными номерами на указанные даты.
 
@@ -94,12 +94,12 @@ class HotelDAO:
 
         return hotels
 
-    async def get_rooms_by_hotel_id(self, hotel_id: int) -> List[Rooms]:
+    async def get_rooms_by_hotel_id(self, hotel_id: int) -> Sequence[Rooms]:
         query = select(Rooms).where(Rooms.hotel_id == hotel_id)
         result = await self.session.execute(query)
         return result.scalars().all()
 
-    async def search_for_rooms(self, hotel_id: int, date_from: date, date_to: date) -> List[Rooms]:
+    async def search_for_rooms(self, hotel_id: int, date_from: date, date_to: date) -> Sequence[Rooms]:
         booked_rooms_cte = (
             select(
                 Bookings.room_id, 
@@ -136,17 +136,7 @@ class BookingDAO:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    # async def get_bookings_by_user_id(self, user_id: int):# -> List[Bookings]:
-    #     query = (
-    #         select(Bookings, Hotels.id, Hotels.name, Hotels.location, Rooms.name)
-    #         .outerjoin(Rooms, Bookings.room_id == Rooms.id)
-    #         .outerjoin(Hotels, Rooms.hotel_id == Hotels.id)
-    #         .where(Bookings.user_id == user_id)
-    #     )
-    #     result = await self.session.execute(query)
-    #     return result.scalars().all()
-
-    async def get_bookings_by_user_id(self, user_id: int) -> List[dict]:
+    async def get_bookings_by_user_id(self, user_id: int) -> Sequence[RowMapping]:
         query = (
             select(
                 Bookings, Hotels, Rooms
@@ -157,31 +147,8 @@ class BookingDAO:
         )
         result = await self.session.execute(query)
         return result.mappings().all()
-
-        # bookings = []
-        # for booking, hotel_id, hotel_name, hotel_location, room_name in result:
-        #     bookings.append(
-        #         {
-        #             "booking_id": booking.id,
-        #             "room_id": booking.room_id,
-        #             "user_id": booking.user_id,
-        #             "date_from": booking.date_from,
-        #             "date_to": booking.date_to,
-        #             "price": booking.price,
-        #             "total_cost": booking.total_cost,
-        #             "total_days": booking.total_days,
-        #             "hotel": {
-        #                 "hotel_id": hotel_id,
-        #                 "hotel_name": hotel_name,
-        #                 "hotel_location": hotel_location,
-        #             },
-        #             "room": {
-        #                 "room_name": room_name,
-        #             },
-        #         }
-        #     )
          
-    async def create_booking(self, room_id: int, user_id: int, date_from: date, date_to: date, price: int) -> Bookings:
+    async def create_booking(self, room_id: int, user_id: int, date_from: date, date_to: date, price: int) -> Optional[Bookings]:
         booking = Bookings(room_id=room_id, user_id=user_id, date_from=date_from, date_to=date_to, price=price)
         self.session.add(booking)
         await self.session.commit()
@@ -221,9 +188,9 @@ class BookingDAO:
 
         query = select(Rooms.quantity > subq.c.booked_count).where(Rooms.id == room_id)
         result = await self.session.execute(query)
-        return result.scalar()
+        return result.scalar_one()
 
     async def get_price(self, room_id: int) -> int:
         query = select(Rooms.price).where(Rooms.id == room_id)
         result = await self.session.execute(query)
-        return result.scalar()
+        return result.scalar_one()

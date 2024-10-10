@@ -19,6 +19,14 @@ class Settings(BaseSettings):
     DB_USER: Optional[str] = Field(None, env="DB_USER")
     DB_PASSWORD: Optional[str] = Field(None, env="DB_PASSWORD")
 
+    SMTP_HOST: str
+    SMTP_PORT: int
+    SMTP_USER: str
+    SMTP_PASS: str
+
+    REDIS_HOST: str
+    REDIS_PORT: int
+
 class Config:
     env_file = ".env"
 

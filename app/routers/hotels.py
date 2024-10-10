@@ -1,12 +1,14 @@
 # Эндпоинты для работы с отелями, такие как получение списка отелей и комнат в отеле.
 
+import asyncio
 from datetime import date, datetime
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.dao import HotelDAO
 from app.dependencies import get_db
 from app.schemas import HotelResponse, RoomResponse
-from typing import List
+from typing import List, Sequence
+from fastapi_cache.decorator import cache
 
 router = APIRouter()
 
@@ -23,12 +25,14 @@ async def get_hotel(hotel_id: int, db: AsyncSession = Depends(get_db)):
     return hotel
 
 @router.get('')
+@cache(expire=20)
 async def get_hotels_by_location_and_time(
     location: str = Query(..., description=f'Например, Алтай'),
     date_from: date = Query(..., description=f'Например, {datetime.now().date()}'),
     date_to: date = Query(..., description=f'Например, {datetime.now().date()}'), 
     db: AsyncSession = Depends(get_db)
-) -> List[HotelResponse]:
+) -> Sequence[HotelResponse]:
+    #await asyncio.sleep(3)
     hotel_dao = HotelDAO(db)
     hotels = await hotel_dao.search_for_hotels(location, date_from, date_to)
     if not hotels:

@@ -47,12 +47,12 @@ async def get_current_user(request: Request, db: AsyncSession = Depends(get_db))
     if token is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated",
+            detail="Пожалуйста, войдите в аккаунт.",
             headers={"WWW-Authenticate": "Bearer"},
         )
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
+        detail="Неверные данные пользователя.",
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
@@ -72,5 +72,5 @@ async def get_current_user(request: Request, db: AsyncSession = Depends(get_db))
 
 async def get_current_active_user(current_user: Users = Depends(get_current_user)):
     if not current_user:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        raise HTTPException(status_code=400, detail="Вы не вошли в свой аккаунт.")
     return current_user
