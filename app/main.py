@@ -5,25 +5,26 @@
 # to start app:
 # uvicorn app.main:app --reload
 
-import asyncio
 from re import A
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.orm import declarative_base
 from contextlib import asynccontextmanager
-from app.routers import auth, hotels, rooms, bookings
-from app.pages.router import router as router_pages
-from app.images.router import router as router_images
-from app.config import settings
-from app.log import logger, handler
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from fastapi_cache.decorator import cache
-
+from fastapi import FastAPI
+from sqladmin import Admin, ModelView
 from redis import asyncio as aioredis
+from app.models import Bookings, Hotels, Rooms, Users
+from app.routers import auth, hotels, rooms, bookings
+from app.pages.router import router as router_pages
+from app.images.router import router as router_images
+from app.config import settings
+from app.log import logger, handler
 
 
 # Database setup
@@ -107,11 +108,53 @@ app.include_router(rooms.router, prefix="/rooms", tags=["rooms"])
 app.include_router(bookings.router, prefix="/bookings", tags=["bookings"])
 
 #Frontend routers
-app.include_router(router_pages)
-app.include_router(router_images)
+# app.include_router(router_pages)
+# app.include_router(router_images)
+
+admin = Admin(app, engine)
+
+
+class UsersAdmin(ModelView, model=Users):
+    can_delete = True
+    name = "Пользователь"
+    name_plural = "Пользователи"
+    icon = "fa-solid fa-users"
+    column_exclude_list = [Users.hashed_password]
+    column_details_exclude_list = [Users.hashed_password]
+    page_size = 100
+
+class BookingsAdmin(ModelView, model=Bookings):
+    can_delete = True
+    name = "Бронирование"
+    name_plural = "Бронирования"
+    icon = "fa-solid fa-book"
+    column_list = "__all__"
+    page_size = 100
+
+class HotelsAdmin(ModelView, model=Hotels):
+    can_delete = True
+    name = "Отель"
+    name_plural = "Отели"
+    icon = "fa-solid fa-hotel"
+    column_list = "__all__"
+    page_size = 100
+
+class RoomsAdmin(ModelView, model=Rooms):
+    can_delete = True
+    name = "Комната"
+    name_plural = "Комнаты"
+    icon = "fa-solid fa-bed"
+    column_list = "__all__"
+    page_size = 100
+
+
+admin.add_view(UsersAdmin)
+admin.add_view(BookingsAdmin)
+admin.add_view(HotelsAdmin)
+admin.add_view(RoomsAdmin)
 
 # TODO 
 # +front, 
-# cash, 
+# +cash, 
 # test, 
 # prod

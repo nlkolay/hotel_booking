@@ -1,4 +1,5 @@
-# В этом файле определяются модели базы данных с использованием SQLAlchemy. Эти модели соответствуют таблицам в базе данных и используются для CRUD операций.
+# В этом файле определяются модели базы данных с использованием SQLAlchemy. 
+# Эти модели соответствуют таблицам в базе данных и используются для CRUD операций.
 
 from sqlalchemy import Column, Integer, String, ForeignKey, Date, Computed, JSON
 from sqlalchemy.orm import relationship, Mapped, mapped_column
@@ -8,12 +9,22 @@ from datetime import date
 
 class Users(Base):
     __tablename__ = 'users'
+
+    def __str__(self):
+        return f'Пользователь {self.email}'
+    
     id: Mapped[int] = mapped_column(primary_key=True)
     email: Mapped[str] = mapped_column(String, unique=True, index=True)
     hashed_password: Mapped[str] = mapped_column(String)
 
+    bookings: Mapped[list['Bookings']] = relationship(back_populates='user')
+
 class Hotels(Base):
     __tablename__ = "hotels"
+
+    def __str__(self):
+        return f'Отель "{self.name}"; {self.location[:30]}'
+    
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String, index=True)
     location: Mapped[str] = mapped_column(String)
@@ -21,8 +32,14 @@ class Hotels(Base):
     rooms_quantity: Mapped[int] = mapped_column(Integer)
     image_id: Mapped[int] = mapped_column(Integer)
 
+    rooms: Mapped[list['Rooms']] = relationship(back_populates='hotel')
+
 class Rooms(Base):
     __tablename__ = "rooms"
+
+    def __str__(self):
+        return f'Номер "{self.name}"'
+    
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     hotel_id: Mapped[int] = mapped_column(ForeignKey("hotels.id"))
     name: Mapped[str] = mapped_column(String)
@@ -32,8 +49,15 @@ class Rooms(Base):
     quantity: Mapped[int] = mapped_column(Integer)
     image_id: Mapped[int] = mapped_column(Integer)
 
+    hotel: Mapped["Hotels"] = relationship(back_populates="rooms")
+    bookings: Mapped[list["Bookings"]] = relationship(back_populates="room")
+
 class Bookings(Base):
     __tablename__ = 'bookings'
+
+    def __str__(self):
+        return f'Бронирование №{self.id}'
+    
     id: Mapped[int] = mapped_column(primary_key=True)
     room_id: Mapped[int] = mapped_column(ForeignKey("rooms.id"))
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
@@ -42,6 +66,10 @@ class Bookings(Base):
     price: Mapped[int] = mapped_column(Integer)
     total_cost: Mapped[int] = mapped_column(Computed("(date_to - date_from) * price"))
     total_days: Mapped[int] = mapped_column(Computed("date_to - date_from"))
+
+    user: Mapped['Users'] = relationship(back_populates='bookings')
+    room: Mapped['Rooms'] = relationship(back_populates='bookings')
+
 
 # class Bookings_extended(Bookings):
 #     #extend_existing=True

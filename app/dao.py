@@ -2,6 +2,7 @@
 # Например, методы для получения пользователя по email, создания бронирования, проверки доступности номеров и т.д.
 
 from typing import List, Optional, Sequence
+from pydantic import EmailStr
 from sqlalchemy import RowMapping, exists, join, label, null, select, func, and_
 from sqlalchemy.orm import Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,18 +13,18 @@ class UserDAO:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get_user_by_email(self, email: str) -> Optional[Users]:
+    async def get_user_by_email(self, email: EmailStr) -> Optional[Users]:
         query = select(Users).where(Users.email == email)
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
-    async def create_user(self, email: str, hashed_password: str) -> Users:
+    async def create_user(self, email: EmailStr, hashed_password: str) -> Users:
         user = Users(email=email, hashed_password=hashed_password)
         self.session.add(user)
         await self.session.commit()
         await self.session.refresh(user)
         return user
-
+    
 class HotelDAO:
     def __init__(self, session: AsyncSession):
         self.session = session
@@ -40,7 +41,7 @@ class HotelDAO:
 
     async def search_for_hotels(self, location: str, date_from: date, date_to: date) -> Sequence[Hotels]: 
         """
-        Асинхронно возвращает список отелей в указанном местоположении с доступными номерами на указанные даты.
+        Возвращает список отелей в указанном местоположении с доступными номерами на указанные даты.
 
         :param location: Местоположение отеля
         :param date_from: Дата начала периода поиска свободных номеров (в формате 'YYYY-MM-DD')

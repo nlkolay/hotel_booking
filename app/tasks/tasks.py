@@ -1,3 +1,5 @@
+# Обычные отложенные таски для селери. 
+# Нет обращений к бд, нет Алхимии, нет обхода асинхронности или смеси движков, как в scheduled.py
 import smtplib
 from pydantic import EmailStr
 from app.config import settings
