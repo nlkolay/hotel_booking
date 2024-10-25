@@ -9,6 +9,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import  Users, Hotels, Rooms, Bookings
 from datetime import date, datetime
 
+from app.schemas import BookingResponseExtended
+
 class UserDAO:
     def __init__(self, session: AsyncSession):
         self.session = session
@@ -137,13 +139,15 @@ class BookingDAO:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get_bookings_by_user_id(self, user_id: int) -> Sequence[RowMapping]:
+    # Пример с использованием relationship алхимии:
+    async def get_bookings_by_user_id(self, user_id: int) -> Sequence[BookingResponseExtended]:
         query = (
             select(Bookings)
             .options(joinedload(Bookings.room))
             .options(joinedload(Bookings.room).subqueryload(Rooms.hotel))
             .where(Bookings.user_id == user_id)
         )   
+        # Который заменил:
         # query = (
         #     select(
         #         Bookings, Hotels, Rooms

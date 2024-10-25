@@ -50,6 +50,8 @@ async def list_bookings(
     ) -> Sequence[BookingResponseExtended]:
     booking_dao = BookingDAO(db)
     bookings = await booking_dao.get_bookings_by_user_id(current_user.id)
+    # Выше пример с использованием relationship алхимии
+    # 
     # try:
     #     validated_data = BookingResponseExtended(bookings=bookings)
     #     return validated_data
