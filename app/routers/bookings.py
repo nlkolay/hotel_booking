@@ -5,15 +5,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.dao import BookingDAO
 from app.dependencies import get_db, get_current_active_user, get_current_user
 from app.models import Bookings, Rooms, Users
-from app.schemas import BookingBase, BookingCreate, BookingResponse, BookingResponseExtended
+from app.schemas import BookingBase, BookingCreate, BookingResponseExtended
 from typing import List, Dict, Sequence
-
-from typing_extensions import TypedDict
 
 from pydantic import TypeAdapter, ValidationError
 
 from app.services import BookingService
-from app.tasks.tasks import send_booking_confirmation_email
 from app.log import logger, handler
 from app.utils import obj_to_dict
 
@@ -34,7 +31,7 @@ async def create_booking(
         current_user,
         db
     )
-    booking_dict = obj_to_dict(new_booking)
+    # booking_dict = obj_to_dict(new_booking)
     # вариант с celery
     # send_booking_confirmation_email.delay(booking_dict, current_user.email) 
 
