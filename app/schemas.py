@@ -9,6 +9,10 @@ class UserCreate(BaseModel):
     email: str
     password: str
 
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
 class UserResponse(BaseModel):
     id: int
     email: str
@@ -21,7 +25,7 @@ class HotelResponse(BaseModel):
     rooms_quantity: int
     image_id: int
 
-class RoomResponse(BaseModel):
+class RoomBase(BaseModel):
     id: int
     hotel_id: int
     name: str
@@ -31,12 +35,15 @@ class RoomResponse(BaseModel):
     quantity: int
     image_id: int
 
+class RoomResponse(RoomBase):
+    hotel: HotelResponse
+
 class BookingCreate(BaseModel):
     room_id: int
     date_from: date
     date_to: date
 
-class BookingResponse(BaseModel):
+class BookingBase(BaseModel):
     id: int
     room_id: int
     user_id: int
@@ -46,10 +53,21 @@ class BookingResponse(BaseModel):
     total_cost: int
     total_days: int
 
+class BookingResponse(BookingBase):
+    room: RoomResponse
+
 class BookingResponseExtended(BaseModel):
     Bookings: BookingResponse
-    Hotels: HotelResponse
-    Rooms: RoomResponse
+
+    # id: int
+    # room_id: int
+    # user_id: int
+    # date_from: date
+    # date_to: date
+    # price: int
+    # total_cost: int
+    # total_days: int
+    # room: RoomResponseExtended    
     
     # bookings: List[BookingResponse]
 

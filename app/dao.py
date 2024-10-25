@@ -4,7 +4,7 @@
 from typing import List, Optional, Sequence
 from pydantic import EmailStr
 from sqlalchemy import RowMapping, exists, join, label, null, select, func, and_
-from sqlalchemy.orm import Query
+from sqlalchemy.orm import Query, selectinload, joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import  Users, Hotels, Rooms, Bookings
 from datetime import date, datetime
@@ -139,13 +139,19 @@ class BookingDAO:
 
     async def get_bookings_by_user_id(self, user_id: int) -> Sequence[RowMapping]:
         query = (
-            select(
-                Bookings, Hotels, Rooms
-                )
-            .outerjoin(Rooms, Bookings.room_id == Rooms.id)
-            .outerjoin(Hotels, Rooms.hotel_id == Hotels.id)
+            select(Bookings)
+            .options(joinedload(Bookings.room))
+            .options(joinedload(Bookings.room).subqueryload(Rooms.hotel))
             .where(Bookings.user_id == user_id)
-        )
+        )   
+        # query = (
+        #     select(
+        #         Bookings, Hotels, Rooms
+        #         )
+        #     .outerjoin(Rooms, Bookings.room_id == Rooms.id)
+        #     .outerjoin(Hotels, Rooms.hotel_id == Hotels.id)
+        #     .where(Bookings.user_id == user_id)
+        # )
         result = await self.session.execute(query)
         return result.mappings().all()
          
