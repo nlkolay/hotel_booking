@@ -1,9 +1,8 @@
 # Эндпоинты для управления бронированиями, включая создание, получение списка и удаление бронирований.
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
 from app.dao import BookingDAO
-from app.dependencies import get_db, get_current_active_user, get_current_user
+from app.dependencies import get_current_active_user, get_current_user
 from app.models import Bookings, Rooms, Users
 from app.schemas import BookingBase, BookingCreate, BookingResponseExtended
 from typing import List, Dict, Sequence
@@ -22,14 +21,12 @@ router = APIRouter()
 async def create_booking(
     booking: BookingCreate, 
     background_tasks: BackgroundTasks,
-    db: AsyncSession = Depends(get_db),
     current_user: Users = Depends(get_current_user)
     ) -> BookingBase:    
     new_booking = await BookingService.create_booking(
         booking,
         background_tasks,
-        current_user,
-        db
+        current_user
     )
     # booking_dict = obj_to_dict(new_booking)
     # вариант с celery
@@ -45,11 +42,9 @@ async def create_booking(
 
 @router.get("/")
 async def list_bookings(
-    db: AsyncSession = Depends(get_db), 
     current_user=Depends(get_current_active_user)
     ) -> Sequence[BookingResponseExtended]:
-    booking_dao = BookingDAO(db)
-    bookings = await booking_dao.get_bookings_by_user_id(current_user.id)
+    bookings = await BookingDAO.get_bookings_by_user_id(current_user.id)
     # Выше пример с использованием relationship алхимии
     # 
     # try:
@@ -63,12 +58,10 @@ async def list_bookings(
 @router.delete("/{booking_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_booking(
     booking_id: int, 
-    db: AsyncSession = Depends(get_db), 
     current_user=Depends(get_current_user)
     ):
-    booking_dao = BookingDAO(db)
-    booking = await booking_dao.get_booking_by_id(booking_id)
+    booking = await BookingDAO.get_booking_by_id(booking_id)
     if booking is None or booking.user_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found")
-    await booking_dao.delete_booking(booking)
+    await BookingDAO.delete_booking(booking)
     return

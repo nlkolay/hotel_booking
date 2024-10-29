@@ -3,10 +3,10 @@
 # Здесь для примера (логика перенесена частично).
 
 from fastapi import BackgroundTasks, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.dao import BookingDAO
 from app.models import Users
 from app.schemas import BookingCreate
+from app.database import AsyncSessionLocal
+from app.dao import BookingDAO
 
 class BookingService:
     @classmethod
@@ -14,28 +14,24 @@ class BookingService:
         cls,
         booking: BookingCreate,
         background_tasks: BackgroundTasks,
-        current_user: Users,
-        db: AsyncSession
+        current_user: Users
     ):
-        booking_dao = BookingDAO(db)
-
         # Проверка доступности комнаты
-        is_available = await booking_dao.is_room_available(booking.room_id, booking.date_from, booking.date_to)
+        is_available = await BookingDAO.is_room_available(booking.room_id, booking.date_from, booking.date_to)
         if not is_available:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Комната недоступна на выбранные даты"
             )
+        
+        price = await BookingDAO.get_price(booking.room_id)
 
-        price = await booking_dao.get_price(booking.room_id)
-
-        new_booking = await booking_dao.create_booking(
+        new_booking = await BookingDAO.create_booking(
             room_id=booking.room_id,
             user_id=current_user.id,
             date_from=booking.date_from,
             date_to=booking.date_to,
             price=price
         )
-
 
         return new_booking

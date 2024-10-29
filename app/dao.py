@@ -6,42 +6,41 @@ from pydantic import EmailStr
 from sqlalchemy import RowMapping, exists, join, label, null, select, func, and_
 from sqlalchemy.orm import Query, selectinload, joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models import  Users, Hotels, Rooms, Bookings
 from datetime import date, datetime
-
+from app.models import  Users, Hotels, Rooms, Bookings
 from app.schemas import BookingResponseExtended
+from app.database import AsyncSessionLocal
+
 
 class UserDAO:
-    def __init__(self, session: AsyncSession):
-        self.session = session
-
-    async def get_user_by_email(self, email: EmailStr) -> Optional[Users]:
+    async def get_user_by_email(email: EmailStr) -> Optional[Users]:
         query = select(Users).where(Users.email == email)
-        result = await self.session.execute(query)
+        async with AsyncSessionLocal() as session:
+            result = await session.execute(query)
         return result.scalar_one_or_none()
 
-    async def create_user(self, email: EmailStr, hashed_password: str) -> Users:
+    async def create_user(email: EmailStr, hashed_password: str) -> Users:
         user = Users(email=email, hashed_password=hashed_password)
-        self.session.add(user)
-        await self.session.commit()
-        await self.session.refresh(user)
+        async with AsyncSessionLocal() as session:
+            session.add(user)
+            await session.commit()
+            await session.refresh(user)
         return user
     
 class HotelDAO:
-    def __init__(self, session: AsyncSession):
-        self.session = session
-
-    async def get_hotels(self) -> Sequence[Hotels]:
+    async def get_hotels() -> Sequence[Hotels]:
         query = select(Hotels)
-        result = await self.session.execute(query)
+        async with AsyncSessionLocal() as session:
+            result = await session.execute(query)
         return result.scalars().all()
 
-    async def get_hotel_by_id(self, hotel_id: int) -> Sequence[Hotels]:
+    async def get_hotel_by_id(hotel_id: int) -> Sequence[Hotels]:
         query = select(Hotels).where(Hotels.id == hotel_id)
-        result = await self.session.execute(query)
+        async with AsyncSessionLocal() as session:
+            result = await session.execute(query)
         return result.scalars().all()
 
-    async def search_for_hotels(self, location: str, date_from: date, date_to: date) -> Sequence[Hotels]: 
+    async def search_for_hotels(location: str, date_from: date, date_to: date) -> Sequence[Hotels]: 
         """
         Возвращает список отелей в указанном местоположении с доступными номерами на указанные даты.
 
@@ -50,7 +49,7 @@ class HotelDAO:
         :param date_to: Дата окончания периода поиска свободных номеров (в формате 'YYYY-MM-DD')
         :return: Список отелей, где есть доступные номера на указанные даты
         """
-        #async with self.session.begin():
+        #async with session.begin():
         # Подготовим подзапрос для поиска свободных номеров
         booked_rooms_cte = (
             select(
@@ -92,17 +91,19 @@ class HotelDAO:
             .where(Hotels.id.in_(select(free_rooms_subquery.c.hotel_id)))
         )
 
-        result = await self.session.execute(query)
+        async with AsyncSessionLocal() as session:
+            result = await session.execute(query)
         hotels = result.scalars().all()
 
         return hotels
 
-    async def get_rooms_by_hotel_id(self, hotel_id: int) -> Sequence[Rooms]:
+    async def get_rooms_by_hotel_id(hotel_id: int) -> Sequence[Rooms]:
         query = select(Rooms).where(Rooms.hotel_id == hotel_id)
-        result = await self.session.execute(query)
+        async with AsyncSessionLocal() as session:
+            result = await session.execute(query)
         return result.scalars().all()
 
-    async def search_for_rooms(self, hotel_id: int, date_from: date, date_to: date) -> Sequence[Rooms]:
+    async def search_for_rooms(hotel_id: int, date_from: date, date_to: date) -> Sequence[Rooms]:
         booked_rooms_cte = (
             select(
                 Bookings.room_id, 
@@ -132,15 +133,13 @@ class HotelDAO:
                 )
             )
         )
-        result = await self.session.execute(query)
+        async with AsyncSessionLocal() as session:
+            result = await session.execute(query)
         return result.scalars().all()
 
 class BookingDAO:
-    def __init__(self, session: AsyncSession):
-        self.session = session
-
     # Пример с использованием relationship алхимии:
-    async def get_bookings_by_user_id(self, user_id: int) -> Sequence[BookingResponseExtended]:
+    async def get_bookings_by_user_id(user_id: int) -> Sequence[BookingResponseExtended]:
         query = (
             select(Bookings)
             .options(joinedload(Bookings.room))
@@ -156,26 +155,30 @@ class BookingDAO:
         #     .outerjoin(Hotels, Rooms.hotel_id == Hotels.id)
         #     .where(Bookings.user_id == user_id)
         # )
-        result = await self.session.execute(query)
+        async with AsyncSessionLocal() as session:
+            result = await session.execute(query)
         return result.mappings().all()
          
-    async def create_booking(self, room_id: int, user_id: int, date_from: date, date_to: date, price: int) -> Optional[Bookings]:
+    async def create_booking(room_id: int, user_id: int, date_from: date, date_to: date, price: int) -> Optional[Bookings]:
         booking = Bookings(room_id=room_id, user_id=user_id, date_from=date_from, date_to=date_to, price=price)
-        self.session.add(booking)
-        await self.session.commit()
-        await self.session.refresh(booking)
+        async with AsyncSessionLocal() as session:
+            session.add(booking)
+            await session.commit()
+            await session.refresh(booking)
         return booking
 
-    async def get_booking_by_id(self, booking_id: int) -> Optional[Bookings]:
+    async def get_booking_by_id(booking_id: int) -> Optional[Bookings]:
         query = select(Bookings).where(Bookings.id == booking_id)
-        result = await self.session.execute(query)
+        async with AsyncSessionLocal() as session:
+            result = await session.execute(query)
         return result.scalar_one_or_none()
 
-    async def delete_booking(self, booking: Bookings):
-        await self.session.delete(booking)
-        await self.session.commit()
+    async def delete_booking(booking: Bookings):
+        async with AsyncSessionLocal() as session:
+            await session.delete(booking)
+            await session.commit()
 
-    async def is_room_available(self, room_id: int, date_from: date, date_to: date) -> bool:
+    async def is_room_available(room_id: int, date_from: date, date_to: date) -> bool:
         subq = (
             select(
                 func.count().label('booked_count')
@@ -198,10 +201,12 @@ class BookingDAO:
         )
 
         query = select(Rooms.quantity > subq.c.booked_count).where(Rooms.id == room_id)
-        result = await self.session.execute(query)
+        async with AsyncSessionLocal() as session:
+            result = await session.execute(query)
         return result.scalar_one()
 
-    async def get_price(self, room_id: int) -> int:
+    async def get_price(room_id: int) -> int:
         query = select(Rooms.price).where(Rooms.id == room_id)
-        result = await self.session.execute(query)
+        async with AsyncSessionLocal() as session:
+            result = await session.execute(query)
         return result.scalar_one()
