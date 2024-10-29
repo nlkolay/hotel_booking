@@ -9,9 +9,6 @@ from datetime import date
 
 class Users(Base):
     __tablename__ = 'users'
-
-    def __str__(self):
-        return f'Пользователь {self.email}'
     
     id: Mapped[int] = mapped_column(primary_key=True)
     email: Mapped[str] = mapped_column(String, unique=True, index=True)
@@ -19,11 +16,11 @@ class Users(Base):
 
     bookings: Mapped[list['Bookings']] = relationship(back_populates='user')
 
+    def __str__(self):
+        return f'Пользователь {self.email}'
+
 class Hotels(Base):
     __tablename__ = "hotels"
-
-    def __str__(self):
-        return f'Отель "{self.name}"; {self.location[:30]}'
     
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String, index=True)
@@ -34,11 +31,11 @@ class Hotels(Base):
 
     rooms: Mapped[list['Rooms']] = relationship(back_populates='hotel')
 
+    def __str__(self):
+        return f'Отель "{self.name}"; {self.location[:30]}'
+
 class Rooms(Base):
     __tablename__ = "rooms"
-
-    def __str__(self):
-        return f'Номер "{self.name}"'
     
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     hotel_id: Mapped[int] = mapped_column(ForeignKey("hotels.id"))
@@ -52,11 +49,11 @@ class Rooms(Base):
     hotel: Mapped["Hotels"] = relationship(back_populates="rooms")
     bookings: Mapped[list["Bookings"]] = relationship(back_populates="room")
 
+    def __str__(self):
+        return f'Номер "{self.name}"'
+
 class Bookings(Base):
     __tablename__ = 'bookings'
-
-    def __str__(self):
-        return f'Бронирование №{self.id}'
     
     id: Mapped[int] = mapped_column(primary_key=True)
     room_id: Mapped[int] = mapped_column(ForeignKey("rooms.id"))
@@ -69,6 +66,9 @@ class Bookings(Base):
 
     user: Mapped['Users'] = relationship(back_populates='bookings')
     room: Mapped['Rooms'] = relationship(back_populates='bookings')
+
+    def __str__(self):
+        return f'Бронирование №{self.id}'
 
 
 # class Bookings_extended(Bookings):

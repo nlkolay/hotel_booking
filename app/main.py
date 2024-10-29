@@ -113,7 +113,6 @@ app.include_router(bookings.router, prefix="/bookings", tags=["bookings"])
 
 admin = Admin(app, engine)
 
-
 class UsersAdmin(ModelView, model=Users):
     can_delete = True
     name = "Пользователь"
