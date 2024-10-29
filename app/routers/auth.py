@@ -2,7 +2,8 @@
 
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.dependencies import authenticate_user, create_access_token, get_db, get_current_user
+from app.database import get_db
+from app.dependencies import authenticate_user, create_access_token, get_current_active_user, get_current_user
 from app.dao import UserDAO
 from email_validator import validate_email, EmailNotValidError
 from app.schemas import Token, UserCreate, UserResponse
@@ -11,7 +12,7 @@ from app.utils import pwd_context
 
 router = APIRouter()
 
-@router.post("/register")#, response_model=Token)
+@router.post("/register")
 async def register(
     user: UserCreate, 
     db: AsyncSession = Depends(get_db)
@@ -52,7 +53,7 @@ async def login(
 
 @router.get("/account")
 async def get_account_details(
-    current_user = Depends(get_current_user)
+    current_user = Depends(get_current_active_user)
     ) -> UserResponse:
     return current_user
 

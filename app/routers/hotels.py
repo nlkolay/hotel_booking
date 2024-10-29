@@ -5,10 +5,10 @@ from datetime import date, datetime
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.dao import HotelDAO
-from app.dependencies import get_db
 from typing import List, Sequence
 from fastapi_cache.decorator import cache
 
+from app.database import get_db
 from app.schemas import HotelResponse
 
 router = APIRouter()

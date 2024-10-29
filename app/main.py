@@ -25,6 +25,7 @@ from app.pages.router import router as router_pages
 from app.images.router import router as router_images
 from app.config import settings
 from app.log import logger, handler
+from app.admin.auth import authentication_backend
 
 
 # Database setup
@@ -111,7 +112,7 @@ app.include_router(bookings.router, prefix="/bookings", tags=["bookings"])
 # app.include_router(router_pages)
 # app.include_router(router_images)
 
-admin = Admin(app, engine)
+admin = Admin(app, engine, authentication_backend=authentication_backend)
 
 
 class UsersAdmin(ModelView, model=Users):

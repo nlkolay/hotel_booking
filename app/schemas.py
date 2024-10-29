@@ -2,20 +2,26 @@
 # Эти схемы описывают структуру данных, которая будет передаваться между клиентом и сервером.
 
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import ClassVar, List, Optional
 from datetime import date
 
+from app.models import Users
+
 class UserCreate(BaseModel):
-    email: str
-    password: str
+    model: ClassVar[type] = Users 
+    # email: str
+    # password: str
+
+class UserResponse(UserCreate):
+    pass
+    # id: int
+    # email: str
+    # hashed_password: str
+
 
 class Token(BaseModel):
     access_token: str
     token_type: str
-
-class UserResponse(BaseModel):
-    id: int
-    email: str
 
 class HotelResponse(BaseModel):
     id: int

@@ -3,7 +3,8 @@
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.dao import BookingDAO
-from app.dependencies import get_db, get_current_active_user, get_current_user
+from app.database import get_db
+from app.dependencies import get_current_active_user, get_current_user
 from app.models import Bookings, Rooms, Users
 from app.schemas import BookingBase, BookingCreate, BookingResponseExtended
 from typing import List, Dict, Sequence
