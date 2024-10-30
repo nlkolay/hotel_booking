@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from app.dao import BookingDAO
-from app.dependencies import get_current_active_user, get_current_user
+from app.dependencies import get_current_user
 from app.models import Bookings, Rooms, Users
 from app.schemas import BookingBase, BookingCreate, BookingResponseExtended
 from typing import List, Dict, Sequence
@@ -42,7 +42,7 @@ async def create_booking(
 
 @router.get("/")
 async def list_bookings(
-    current_user=Depends(get_current_active_user)
+    current_user=Depends(get_current_user)
     ) -> Sequence[BookingResponseExtended]:
     bookings = await BookingDAO.get_bookings_by_user_id(current_user.id)
     # Выше пример с использованием relationship алхимии

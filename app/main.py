@@ -5,10 +5,8 @@
 # to start app:
 # uvicorn app.main:app --reload
 
-from re import A
-from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+from fastapi import FastAPI
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy.orm import declarative_base
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,22 +15,19 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from fastapi_cache.decorator import cache
 from fastapi import FastAPI
-from sqladmin import Admin, ModelView
+from starlette.middleware.sessions import SessionMiddleware
+from sqladmin import Admin
 from redis import asyncio as aioredis
+from app.admin.auth import authentication_backend
 from app.admin.views import BookingsAdmin, HotelsAdmin, RoomsAdmin, UsersAdmin
-from app.models import Bookings, Hotels, Rooms, Users
+from app.database import Base
 from app.routers import auth, hotels, rooms, bookings
 from app.pages.router import router as router_pages
 from app.images.router import router as router_images
 from app.config import settings
+from app.database import AsyncSessionLocal, engine
 from app.log import logger, handler
 
-
-# Database setup
-DATABASE_URL = settings.DATABASE_URL
-engine = create_async_engine(DATABASE_URL, echo=True)
-AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
-Base = declarative_base()
 
 # Parallel with startup :
 # async def get_cache():
@@ -49,8 +44,8 @@ async def lifespan(app: FastAPI):
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
     logger.info("Redis is ready.")
     # Create database tables
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    # async with AsyncSessionLocal() as session:
+    #     await session.run_sync(Base.metadata.create_all)
     #asyncio.create_task(get_cache())
     print('starting now')
     #
@@ -76,6 +71,8 @@ allow_methods=["GET", 'POST', 'OPTIONS', 'DELETE', 'PATCH', 'PUT'],  # Allow met
 allow_headers=["Content-Type", 'Set-Cookie', 'Access-Control-Allow-Headers', 
                'Access-Control-Allow-Origins', 'Authorization'],  # Allow headers
 )
+
+app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 
 # pics
 
@@ -112,7 +109,7 @@ app.include_router(bookings.router, prefix="/bookings", tags=["bookings"])
 # app.include_router(router_pages)
 # app.include_router(router_images)
 
-admin = Admin(app, engine)
+admin = Admin(app, engine, authentication_backend=authentication_backend)
 
 admin.add_view(UsersAdmin)
 admin.add_view(BookingsAdmin)

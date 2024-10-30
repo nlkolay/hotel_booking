@@ -13,6 +13,7 @@ from app.database import AsyncSessionLocal
 
 
 class UserDAO:
+    @classmethod
     async def get_user_by_email(email: EmailStr) -> Optional[Users]:
         query = select(Users).where(Users.email == email)
         async with AsyncSessionLocal() as session:

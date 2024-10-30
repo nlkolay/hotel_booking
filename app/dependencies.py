@@ -1,16 +1,24 @@
 #В этом файле содержатся зависимости и вспомогательные функции, такие как функции для аутентификации пользователей,
 # создание JWT токенов и валидация токенов. Эти функции используются для защиты маршрутов и аутентификации.
 
+from typing import Optional
 from fastapi import Depends, HTTPException, status, Request
 from jose import JWTError, jwt
+from pydantic import EmailStr
 from sqlalchemy.future import select
 from app.database import AsyncSessionLocal
 from app.models import Users
 from datetime import datetime, timedelta, timezone
 from app.config import settings, pwd_context
+from app.schemas import Token, UserResponse
 
 
-async def authenticate_user(email: str, password: str):
+credentials_exception = HTTPException(
+    status_code=status.HTTP_401_UNAUTHORIZED,
+    detail="Неверные данные пользователя."
+)
+
+async def authenticate_user(email: str, password: str) -> UserResponse | None:
     query = select(Users).where(Users.email == email)
     async with AsyncSessionLocal() as session:
         result = await session.execute(query)
@@ -19,7 +27,7 @@ async def authenticate_user(email: str, password: str):
         return user
     return None
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
+def create_access_token(data: dict, expires_delta: timedelta | None = None) -> Token:
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
@@ -29,22 +37,26 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt
 
-async def get_current_user(request: Request):
-    token = request.cookies.get("access_token")
+# async def get_token(request: Request) -> Optional[Token]:
+#     token: Token = request.session.get("token")
+#     if token is None:
+#         raise HTTPException(
+#             status_code=status.HTTP_401_UNAUTHORIZED,
+#             detail="Пожалуйста, войдите в аккаунт."
+#         )
+#     return token
+
+async def get_current_user(request: Request) -> Optional[UserResponse]:
+    #token: Token = await get_token(request)
+    token: str = request.session.get("token")
     if token is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Пожалуйста, войдите в аккаунт.",
-            headers={"WWW-Authenticate": "Bearer"},
+            detail="Пожалуйста, войдите в аккаунт."
         )
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Неверные данные пользователя.",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
     try:
-        payload = jwt.decode(token.replace("Bearer ", ""), settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-        email: str = payload.get("sub")
+        payload = jwt.decode(token, settings.SECRET_KEY, settings.ALGORITHM)
+        email: EmailStr = payload.get("sub")
         if email is None:
             raise credentials_exception
         query = select(Users).where(Users.email == email)
@@ -56,9 +68,3 @@ async def get_current_user(request: Request):
     except JWTError:
         raise credentials_exception
     return user
-
-
-async def get_current_active_user(current_user: Users = Depends(get_current_user)):
-    if not current_user:
-        raise HTTPException(status_code=400, detail="Вы не вошли в свой аккаунт.")
-    return current_user

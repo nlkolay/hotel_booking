@@ -1,7 +1,7 @@
 # Эндпоинты для аутентификации и авторизации пользователей, такие как регистрация, логин, получение информации о пользователе и выход из системы.
 
-from fastapi import APIRouter, Depends, HTTPException, status, Response
-from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Optional
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from app.dependencies import authenticate_user, create_access_token, get_current_user
 from app.dao import UserDAO
 from email_validator import validate_email, EmailNotValidError
@@ -11,10 +11,10 @@ from app.utils import pwd_context
 
 router = APIRouter()
 
-@router.post("/register")#, response_model=Token)
+@router.post("/register")
 async def register(
     user: UserCreate
-    ):
+    ) -> dict:
     try:
         valid = validate_email(user.email, check_deliverability=False)
         email = valid.normalized
@@ -27,33 +27,32 @@ async def register(
 
     hashed_password = pwd_context.hash(user.password)
     new_user = await UserDAO.create_user(email, hashed_password)
-    #access_token = create_access_token(data={"sub": new_user.email})
-    return #{"access_token": access_token, "token_type": "bearer"}
+    return {"message": "Пользователь создан."}
 
 @router.post("/login")
 async def login(
-    user: UserCreate, 
-    response: Response = None
-    ) -> Token:
-    user = await authenticate_user(user.email, user.password)
+    user_input: UserCreate, 
+    request: Request
+    ) -> Optional[dict]:
+    user = await authenticate_user(user_input.email, user_input.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Неверные e-mail или пароль.",
         )
-    access_token = create_access_token(data={"sub": user.email})
+    access_token = create_access_token({"sub": str(user.email)})
 
 #Set cookie in response
-    response.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True)
-    return {"access_token": access_token, "token_type": "bearer"}
+    request.session.update({"token": access_token})
+    return {"token": access_token}
 
 @router.get("/account")
 async def get_account_details(
     current_user = Depends(get_current_user)
-    ) -> UserResponse:
+    ) -> Optional[UserResponse]:
     return current_user
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
-async def logout(response: Response):
-    response.delete_cookie(key="access_token")
+async def logout(request: Request) -> None:
+    request.session.clear()
     return
