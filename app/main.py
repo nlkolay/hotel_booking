@@ -6,8 +6,6 @@
 # uvicorn app.main:app --reload
 
 from fastapi import FastAPI
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-from sqlalchemy.orm import declarative_base
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -20,12 +18,11 @@ from sqladmin import Admin
 from redis import asyncio as aioredis
 from app.admin.auth import authentication_backend
 from app.admin.views import BookingsAdmin, HotelsAdmin, RoomsAdmin, UsersAdmin
-from app.database import Base
 from app.routers import auth, hotels, rooms, bookings
 from app.pages.router import router as router_pages
 from app.images.router import router as router_images
 from app.config import settings
-from app.database import AsyncSessionLocal, engine
+from app.database import engine
 from app.log import logger, handler
 
 
