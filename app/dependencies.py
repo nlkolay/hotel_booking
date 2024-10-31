@@ -10,7 +10,7 @@ from app.database import AsyncSessionLocal
 from app.models import Users
 from datetime import datetime, timedelta, timezone
 from app.config import settings, pwd_context
-from app.schemas import Token, UserResponse
+from app.schemas import UserResponse
 
 
 credentials_exception = HTTPException(
@@ -27,7 +27,7 @@ async def authenticate_user(email: str, password: str) -> UserResponse | None:
         return user
     return None
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None) -> Token:
+def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta

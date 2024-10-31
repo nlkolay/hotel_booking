@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Request
 from app.dependencies import authenticate_user, create_access_token, get_current_user
 from app.dao import UserDAO
 from email_validator import validate_email, EmailNotValidError
-from app.schemas import Token, UserCreate, UserResponse
+from app.schemas import UserCreate, UserResponse
 from app.utils import pwd_context
 
 

@@ -21,15 +21,15 @@ def periodic_task(days_left: int): # Обход синхронности сел�
 async def run_periodic_task(days_left: int):  
     async with AsyncSession(engine) as session:
         # Получаем пользователей с запланированным заездом на завтра
-        task_dao = TaskDAO(session)
-        bookings = await task_dao.get_booking_by_days_left(days_left)
-        for booking in bookings:
-            path = f'app/tmp/{booking.id}.eml'
-            if not (isfile(path)):
-                with open(f'app/tmp/{booking.id}.eml', 'wb') as f:
-                    email_to = await task_dao.get_email_by_booking(booking)
-                    msg_content = create_booking_reminder_template(booking, email_to)
-                    f.write(msg_content)
+        bookings = await TaskDAO.get_booking_by_days_left(days_left)
+        if bookings is not None:
+            for booking in bookings:
+                path = f'app/tmp/{booking.id}.eml'
+                if not (isfile(path)):
+                    with open(f'app/tmp/{booking.id}.eml', 'wb') as f:
+                        email_to = await TaskDAO.get_email_by_booking(booking)
+                        msg_content = create_booking_reminder_template(booking, email_to)
+                        f.write(msg_content)
 
 """ Как правильно получать ответ в таске, если нужно обращаться к БД и в ответ приходит корутина?
 

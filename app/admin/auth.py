@@ -14,7 +14,7 @@ class AdminAuth(AuthenticationBackend):
             request: Request
             ) -> bool:
         form = await request.form()
-        email, password = form["username"], form["password"]
+        email, password = str(form["username"]), str(form["password"])
 
         user = await authenticate_user(email, password)
         if user:

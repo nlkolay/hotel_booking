@@ -9,7 +9,7 @@ class UserCreate(BaseModel):
     email: str
     password: str
 
-class Token(BaseModel):
+class TokenDepr(BaseModel):
     access_token: str
 
 class UserResponse(BaseModel):
