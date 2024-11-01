@@ -9,12 +9,16 @@ class UserCreate(BaseModel):
     email: str
     password: str
 
-class TokenDepr(BaseModel):
-    access_token: str
-
-class UserResponse(BaseModel):
+class UserBase(BaseModel):
     id: int
     email: str
+    hashed_password: str
+
+class UserResponse(UserBase):
+    bookings: List['BookingResponse']
+
+class TokenDepr(BaseModel):
+    access_token: str
 
 class HotelResponse(BaseModel):
     id: int
@@ -42,12 +46,9 @@ class BookingCreate(BaseModel):
     date_from: date
     date_to: date
 
-class BookingBase(BaseModel):
+class BookingBase(BookingCreate):
     id: int
-    room_id: int
     user_id: int
-    date_from: date
-    date_to: date
     price: int
     total_cost: int
     total_days: int
@@ -57,18 +58,6 @@ class BookingResponse(BookingBase):
 
 class BookingResponseExtended(BaseModel):
     Bookings: BookingResponse
-
-    # id: int
-    # room_id: int
-    # user_id: int
-    # date_from: date
-    # date_to: date
-    # price: int
-    # total_cost: int
-    # total_days: int
-    # room: RoomResponseExtended    
-    
-    # bookings: List[BookingResponse]
 
     # @field_validator("bookings")
     # def validate_bookings(cls, value):

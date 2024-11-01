@@ -1,4 +1,5 @@
-# Этот файл содержит настройки проекта и валидацию переменных окружения с использованием Pydantic. Он обеспечивает централизованное место для управления конфигурацией проекта.
+# Этот файл содержит настройки проекта и валидацию переменных окружения с использованием Pydantic. 
+# Он обеспечивает централизованное место для управления конфигурацией проекта.
 from typing import Literal
 from fastapi.security import OAuth2PasswordBearer
 from pydantic_settings import BaseSettings, SettingsConfigDict

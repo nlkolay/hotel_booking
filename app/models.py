@@ -1,7 +1,7 @@
 # В этом файле определяются модели базы данных с использованием SQLAlchemy. 
 # Эти модели соответствуют таблицам в базе данных и используются для CRUD операций.
 
-from sqlalchemy import Column, Integer, String, ForeignKey, Date, Computed, JSON
+from sqlalchemy import Integer, String, ForeignKey, Date, Computed, JSON
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from app.database import Base
 from typing import Optional

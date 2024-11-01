@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Request
 from app.dependencies import authenticate_user, create_access_token, get_current_user
 from app.dao import UserDAO
 from email_validator import validate_email, EmailNotValidError
-from app.schemas import UserCreate, UserResponse
+from app.schemas import UserBase, UserCreate, UserResponse
 from app.utils import pwd_context
 
 
@@ -49,7 +49,7 @@ async def login(
 @router.get("/account")
 async def get_account_details(
     current_user = Depends(get_current_user)
-    ) -> Optional[UserResponse]:
+    ) -> Optional[UserBase]:
     return current_user
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)

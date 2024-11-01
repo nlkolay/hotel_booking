@@ -1,8 +1,7 @@
-from typing import Optional
+# Аутентификация админки sqladmin
+# TODO: добавить роли юзеров - https://stepik.org/lesson/926340/step/9?discussion=7562112&reply=7740346&unit=932223
 from fastapi import HTTPException, Request
 from sqladmin.authentication import AuthenticationBackend
-# from starlette.requests import Request
-# from starlette.responses import RedirectResponse
 from fastapi.responses import RedirectResponse
 from app.dependencies import authenticate_user, create_access_token, get_current_user
 from app.config import settings
