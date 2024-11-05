@@ -1,13 +1,12 @@
 # Эндпоинты для работы с отелями, такие как получение списка отелей и комнат в отеле.
 
-import asyncio
 from datetime import date, datetime
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Depends, Query
 from app.dao import HotelDAO
 from typing import List, Sequence
 from fastapi_cache.decorator import cache
 
+from app.exceptions import DatesInvalid, NoVacation, TooLong
 from app.schemas import HotelResponse
 
 router = APIRouter()
@@ -27,12 +26,16 @@ async def get_hotel(
 @router.get('')
 @cache(expire=20)
 async def get_hotels_by_location_and_time(
-    location: str = Query(..., description=f'Например, Алтай'),
+    location: str = Query(..., min_length=1, description=f'Например, Алтай'),
     date_from: date = Query(..., description=f'Например, {datetime.now().date()}'),
     date_to: date = Query(..., description=f'Например, {datetime.now().date()}')
     ) -> Sequence[HotelResponse]:
     #await asyncio.sleep(3)
+    if date_from >= date_to:
+        raise DatesInvalid
+    if (date_to - date_from).days > 30:
+        raise TooLong
     hotels = await HotelDAO.search_for_hotels(location, date_from, date_to)
     if not hotels:
-        raise HTTPException(status_code=404, detail="Нет доступных отелей на указанные даты.")
+        raise NoVacation
     return hotels

@@ -1,10 +1,11 @@
 # Эндпоинты для аутентификации и авторизации пользователей, такие как регистрация, логин, получение информации о пользователе и выход из системы.
 
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, status, Request
 from app.dependencies import authenticate_user, create_access_token, get_current_user
 from app.dao import UserDAO
 from email_validator import validate_email, EmailNotValidError
+from app.exceptions import EmailAlreadyUsed, EmailNotValid, InvalidCredentials
 from app.schemas import UserBase, UserCreate, UserResponse
 from app.utils import pwd_context
 
@@ -19,11 +20,11 @@ async def register(
         valid = validate_email(user.email, check_deliverability=False)
         email = valid.normalized
     except EmailNotValidError:
-        raise HTTPException(status_code=400, detail="Некорректный e-mail.")
+        raise EmailNotValid
 
     existing_user = await UserDAO.get_user_by_email(email)
     if existing_user:
-        raise HTTPException(status_code=400, detail="E-mail уже использован.")
+        raise EmailAlreadyUsed
 
     hashed_password = pwd_context.hash(user.password)
     new_user = await UserDAO.create_user(email, hashed_password)
@@ -36,10 +37,7 @@ async def login(
     ) -> Optional[dict]:
     user = await authenticate_user(user_input.email, user_input.password)
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Неверные e-mail или пароль.",
-        )
+        raise InvalidCredentials
     access_token = create_access_token({"sub": str(user.email)})
 
 #Set cookie in response

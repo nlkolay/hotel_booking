@@ -3,12 +3,12 @@
 
 from typing import Optional, Sequence
 from pydantic import EmailStr
-from sqlalchemy import select, func
+from sqlalchemy import and_, or_, select, func
 from sqlalchemy.orm import selectinload, joinedload
 from datetime import date
 from app.models import  Users, Hotels, Rooms, Bookings
 from app.schemas import BookingBase, BookingResponseExtended, HotelResponse, RoomResponse, UserResponse
-from app.database import AsyncSessionLocal, session
+from app.database import AsyncSessionLocal
 
 
 class UserDAO:
@@ -167,7 +167,7 @@ class BookingDAO:
         return result.mappings().all()
          
     @classmethod
-    async def create_booking(self, room_id: int, user_id: int, date_from: date, date_to: date, price: int) -> BookingBase:
+    async def add_booking(self, room_id: int, user_id: int, date_from: date, date_to: date, price: int) -> BookingBase:
         booking = Bookings(room_id=room_id, user_id=user_id, date_from=date_from, date_to=date_to, price=price)
         async with AsyncSessionLocal() as session:
             session.add(booking)
@@ -191,38 +191,39 @@ class BookingDAO:
     @classmethod
     async def is_room_available(self, room_id: int, date_from: date, date_to: date) -> bool:
         subq = (
-            select(
-                func.count().label('booked_count')
-                )
-            .select_from(Rooms)
-            .outerjoin(Bookings, Bookings.room_id == Rooms.id)
+            select(func.count().label('booked_count'))
+            .select_from(Bookings)
             .where(
-                (Bookings.room_id == room_id) &
-                (
-                (
-                (Bookings.date_from >= date_from) &
-                (Bookings.date_from <= date_to)
-                ) |
-                (
-                (Bookings.date_from <= date_from) &
-                (Bookings.date_to > date_from)
+                and_(
+                    Bookings.room_id == room_id,
+                    or_(
+                        and_(Bookings.date_from >= date_from, Bookings.date_from <= date_to),
+                        and_(Bookings.date_from <= date_from, Bookings.date_to > date_from)
+                    )
                 )
-                )
-                )
+            )
+            .correlate(Rooms)
+            .scalar_subquery()
         )
 
-        query = select(Rooms.quantity > subq.c.booked_count).where(Rooms.id == room_id)
+        query = (
+            select(Rooms.quantity > subq)
+            .where(Rooms.id == room_id)
+        )
+
         async with AsyncSessionLocal() as session:
             result = await session.execute(query)
-        return result.scalar_one()
+            return result.scalar_one()
 
     @classmethod
     async def get_price(self, room_id: int) -> int:
         query = select(Rooms.price).where(Rooms.id == room_id)
-        result = await session.execute(query)
+        async with AsyncSessionLocal() as session:
+            result = await session.execute(query)
         return result.scalar_one()
-    
     # TODO:
+    # непонятно как это сделать:
+    # AttributeError: 'classmethod' object has no attribute 'execute'
     # переделать обращения к БД по образцу db from database.py
     # async def session():
     #     async with AsyncSessionLocal() as session:

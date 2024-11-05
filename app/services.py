@@ -1,12 +1,14 @@
-# Сервисы - слой логики для эндпоинтов, не привязанный к конкретному API. Вызывается роутером, обращается к 
+# Сервисы - слой логики для эндпоинтов, не привязанный к конкретному API. 
+# Вызывается роутером, обращается к 
 # DAO/Repo, внешнему API, другим сервисам и т.д.
-# Здесь для примера (логика перенесена частично).
+# Здесь для примера.
 
-from fastapi import BackgroundTasks, HTTPException, status
+from fastapi import BackgroundTasks
+from app.exceptions import RoomIsNotAvailable
 from app.models import Users
 from app.schemas import BookingCreate
-from app.database import AsyncSessionLocal
 from app.dao import BookingDAO
+
 
 class BookingService:
     @classmethod
@@ -19,14 +21,11 @@ class BookingService:
         # Проверка доступности комнаты
         is_available = await BookingDAO.is_room_available(booking.room_id, booking.date_from, booking.date_to)
         if not is_available:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Комната недоступна на выбранные даты"
-            )
+            raise RoomIsNotAvailable
         
         price = await BookingDAO.get_price(booking.room_id)
 
-        new_booking = await BookingDAO.create_booking(
+        new_booking = await BookingDAO.add_booking(
             room_id=booking.room_id,
             user_id=current_user.id,
             date_from=booking.date_from,

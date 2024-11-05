@@ -2,21 +2,17 @@
 # создание JWT токенов и валидация токенов. Эти функции используются для защиты маршрутов и аутентификации.
 
 from typing import Optional
-from fastapi import Depends, HTTPException, status, Request
+from fastapi import Depends, Request
 from jose import JWTError, jwt
 from pydantic import EmailStr
 from sqlalchemy.future import select
 from app.database import AsyncSessionLocal
+from app.exceptions import InvalidCredentials, NotLoggedIn
 from app.models import Users
 from datetime import datetime, timedelta, timezone
 from app.config import settings, pwd_context
 from app.schemas import UserResponse
 
-
-credentials_exception = HTTPException(
-    status_code=status.HTTP_401_UNAUTHORIZED,
-    detail="Неверные данные пользователя."
-)
 
 async def authenticate_user(email: str, password: str) -> UserResponse | None:
     query = select(Users).where(Users.email == email)
@@ -40,31 +36,25 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
 # async def get_token(request: Request) -> Optional[Token]:
 #     token: Token = request.session.get("token")
 #     if token is None:
-#         raise HTTPException(
-#             status_code=status.HTTP_401_UNAUTHORIZED,
-#             detail="Пожалуйста, войдите в аккаунт."
-#         )
+#         raise NotLoggedIn
 #     return token
 
 async def get_current_user(request: Request) -> Optional[UserResponse]:
     #token: Token = await get_token(request)
     token: str = request.session.get("token")
     if token is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Пожалуйста, войдите в аккаунт."
-        )
+        raise NotLoggedIn
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, settings.ALGORITHM)
         email: EmailStr = payload.get("sub")
         if email is None:
-            raise credentials_exception
+            raise InvalidCredentials
         query = select(Users).where(Users.email == email)
         async with AsyncSessionLocal() as session:
             result = await session.execute(query)
         user = result.scalar_one_or_none()
         if user is None:
-            raise credentials_exception
+            raise InvalidCredentials
     except JWTError:
-        raise credentials_exception
+        raise InvalidCredentials
     return user
