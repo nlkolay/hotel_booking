@@ -11,6 +11,7 @@ class UsersAdmin(ModelView, model=Users):
     column_details_exclude_list = [Users.hashed_password]
     page_size = 100
 
+
 class BookingsAdmin(ModelView, model=Bookings):
     can_delete = True
     name = "Бронирование"
@@ -19,6 +20,7 @@ class BookingsAdmin(ModelView, model=Bookings):
     column_list = "__all__"
     page_size = 100
 
+
 class HotelsAdmin(ModelView, model=Hotels):
     can_delete = True
     name = "Отель"
@@ -26,6 +28,7 @@ class HotelsAdmin(ModelView, model=Hotels):
     icon = "fa-solid fa-hotel"
     column_list = "__all__"
     page_size = 100
+
 
 class RoomsAdmin(ModelView, model=Rooms):
     can_delete = True

@@ -9,6 +9,7 @@ from passlib.context import CryptContext
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
+
 class Settings(BaseSettings):
     MODE: Literal["DEV", "TEST", "PROD"]
     LOG_LEVEL: str
@@ -53,5 +54,6 @@ class Settings(BaseSettings):
     # class Config:
     #     env_file = ".env"
     model_config = SettingsConfigDict(env_file=".env")
+
 
 settings = Settings()

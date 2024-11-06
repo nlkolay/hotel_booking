@@ -5,20 +5,25 @@ from pydantic import BaseModel
 from typing import List, Optional
 from datetime import date
 
+
 class UserCreate(BaseModel):
     email: str
     password: str
+
 
 class UserBase(BaseModel):
     id: int
     email: str
     hashed_password: str
 
+
 class UserResponse(UserBase):
-    bookings: List['BookingResponse']
+    bookings: List["BookingResponse"]
+
 
 class TokenDepr(BaseModel):
     access_token: str
+
 
 class HotelResponse(BaseModel):
     id: int
@@ -27,6 +32,7 @@ class HotelResponse(BaseModel):
     services: List[str]
     rooms_quantity: int
     image_id: int
+
 
 class RoomBase(BaseModel):
     id: int
@@ -38,13 +44,16 @@ class RoomBase(BaseModel):
     quantity: int
     image_id: int
 
+
 class RoomResponse(RoomBase):
     hotel: HotelResponse
+
 
 class BookingCreate(BaseModel):
     room_id: int
     date_from: date
     date_to: date
+
 
 class BookingBase(BookingCreate):
     id: int
@@ -53,8 +62,10 @@ class BookingBase(BookingCreate):
     total_cost: int
     total_days: int
 
+
 class BookingResponse(BookingBase):
     room: RoomResponse
+
 
 class BookingResponseExtended(BaseModel):
     Bookings: BookingResponse

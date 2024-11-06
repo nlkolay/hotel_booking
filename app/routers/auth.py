@@ -12,10 +12,9 @@ from app.utils import pwd_context
 
 router = APIRouter()
 
+
 @router.post("/register")
-async def register(
-    user: UserCreate
-    ) -> dict:
+async def register(user: UserCreate) -> dict:
     try:
         valid = validate_email(user.email, check_deliverability=False)
         email = valid.normalized
@@ -30,25 +29,25 @@ async def register(
     new_user = await UserDAO.create_user(email, hashed_password)
     return {"message": "Пользователь создан."}
 
+
 @router.post("/login")
-async def login(
-    user_input: UserCreate,
-    request: Request
-    ) -> Optional[dict]:
+async def login(user_input: UserCreate, request: Request) -> Optional[dict]:
     user = await authenticate_user(user_input.email, user_input.password)
     if not user:
         raise InvalidCredentials
     access_token = create_access_token({"sub": str(user.email)})
 
-#Set cookie in response
+    # Set cookie in response
     request.session.update({"token": access_token})
     return {"token": access_token}
 
+
 @router.get("/account")
 async def get_account_details(
-    current_user = Depends(get_current_user)
-    ) -> Optional[UserBase]:
+    current_user=Depends(get_current_user),
+) -> Optional[UserBase]:
     return current_user
+
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 async def logout(request: Request) -> None:

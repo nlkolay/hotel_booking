@@ -10,13 +10,19 @@ from app.config import settings
 
 # Настройка базы данных
 DATABASE_URL = settings.DATABASE_URL  # Замените на вашу строку подключения
-engine = create_async_engine(DATABASE_URL)#, poolclass=NullPool) при новых ошибках (см внизу)
-#Session = async_sessionmaker(engine)
+engine = create_async_engine(
+    DATABASE_URL
+)  # , poolclass=NullPool) при новых ошибках (см внизу)
+# Session = async_sessionmaker(engine)
 
-@celery.task(name='days-left-reminder')
-def periodic_task(days_left: int): # Обход синхронности селери
+
+@celery.task(name="days-left-reminder")
+def periodic_task(days_left: int):  # Обход синхронности селери
     loop = asyncio.get_event_loop()  # Get the current event loop
-    loop.run_until_complete(run_periodic_task(days_left))  # Run the task on the current loop
+    loop.run_until_complete(
+        run_periodic_task(days_left)
+    )  # Run the task on the current loop
+
 
 async def run_periodic_task(days_left: int):
     async with AsyncSession(engine) as session:
@@ -24,12 +30,15 @@ async def run_periodic_task(days_left: int):
         bookings = await TaskDAO.get_booking_by_days_left(days_left)
         if bookings is not None:
             for booking in bookings:
-                path = f'app/tmp/{booking.id}.eml'
+                path = f"app/tmp/{booking.id}.eml"
                 if not (isfile(path)):
-                    with open(f'app/tmp/{booking.id}.eml', 'wb') as f:
+                    with open(f"app/tmp/{booking.id}.eml", "wb") as f:
                         email_to = await TaskDAO.get_email_by_booking(booking)
-                        msg_content = create_booking_reminder_template(booking, email_to)
+                        msg_content = create_booking_reminder_template(
+                            booking, email_to
+                        )
                         f.write(msg_content)
+
 
 """ Как правильно получать ответ в таске, если нужно обращаться к БД и в ответ приходит корутина?
 

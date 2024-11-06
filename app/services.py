@@ -16,10 +16,12 @@ class BookingService:
         cls,
         booking: BookingCreate,
         background_tasks: BackgroundTasks,
-        current_user: Users
+        current_user: Users,
     ):
         # Проверка доступности комнаты
-        is_available = await BookingDAO.is_room_available(booking.room_id, booking.date_from, booking.date_to)
+        is_available = await BookingDAO.is_room_available(
+            booking.room_id, booking.date_from, booking.date_to
+        )
         if not is_available:
             raise RoomIsNotAvailable
 
@@ -30,7 +32,7 @@ class BookingService:
             user_id=current_user.id,
             date_from=booking.date_from,
             date_to=booking.date_to,
-            price=price
+            price=price,
         )
 
         return new_booking

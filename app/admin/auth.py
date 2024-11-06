@@ -8,10 +8,7 @@ from app.config import settings
 
 
 class AdminAuth(AuthenticationBackend):
-    async def login(
-            self,
-            request: Request
-            ) -> bool:
+    async def login(self, request: Request) -> bool:
         form = await request.form()
         email, password = str(form["username"]), str(form["password"])
 
@@ -33,5 +30,6 @@ class AdminAuth(AuthenticationBackend):
             if exc.status_code == 401:
                 return RedirectResponse(request.url_for("admin:login"), status_code=302)
         return True
+
 
 authentication_backend = AdminAuth(secret_key=settings.SECRET_KEY)

@@ -4,28 +4,26 @@ import pytest
 
 
 @pytest.mark.parametrize(
-    'room_id, user_id, date_from, date_to, price', [
-    (2, 2, '2024-10-10', '2024-10-12', 1000),
-    (2, 2, '2024-10-10', '2023-10-12', 1000),
-    # (2, 3, '2024-10-10', '2024-10-12', 1000),
-    # asyncpg.exceptions.ForeignKeyViolationError
-    (2, 2, '2024-10-10', '2024-10-12', -1000),
-]
+    "room_id, user_id, date_from, date_to, price",
+    [
+        (2, 2, "2024-10-10", "2024-10-12", 1000),
+        (2, 2, "2024-10-10", "2023-10-12", 1000),
+        # (2, 3, '2024-10-10', '2024-10-12', 1000),
+        # asyncpg.exceptions.ForeignKeyViolationError
+        (2, 2, "2024-10-10", "2024-10-12", -1000),
+    ],
 )
 async def test_add_get_booking(
-    room_id: int,
-    user_id: int,
-    date_from: str,
-    date_to: str,
-    price: int):
+    room_id: int, user_id: int, date_from: str, date_to: str, price: int
+):
     # Create a new booking
     new_booking = await BookingDAO.add_booking(
         room_id=room_id,
         user_id=user_id,
         date_from=date.fromisoformat(date_from),
         date_to=date.fromisoformat(date_to),
-        price=price
-        )
+        price=price,
+    )
 
     # Validate the booking creation
     # assert new_booking.id == 4, "Booking ID does not match expected value."

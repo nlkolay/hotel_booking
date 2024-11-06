@@ -1,4 +1,4 @@
-#В этом файле содержатся зависимости и вспомогательные функции, такие как функции для аутентификации пользователей,
+# В этом файле содержатся зависимости и вспомогательные функции, такие как функции для аутентификации пользователей,
 # создание JWT токенов и валидация токенов. Эти функции используются для защиты маршрутов и аутентификации.
 
 from typing import Optional
@@ -23,15 +23,21 @@ async def authenticate_user(email: str, password: str) -> UserResponse | None:
         return user
     return None
 
+
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.now(timezone.utc) + timedelta(
+            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        )
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    encoded_jwt = jwt.encode(
+        to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM
+    )
     return encoded_jwt
+
 
 # async def get_token(request: Request) -> Optional[Token]:
 #     token: Token = request.session.get("token")
@@ -39,8 +45,9 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
 #         raise NotLoggedIn
 #     return token
 
+
 async def get_current_user(request: Request) -> Optional[UserResponse]:
-    #token: Token = await get_token(request)
+    # token: Token = await get_token(request)
     token: str = request.session.get("token")
     if token is None:
         raise NotLoggedIn
