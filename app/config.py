@@ -1,4 +1,4 @@
-# Этот файл содержит настройки проекта и валидацию переменных окружения с использованием Pydantic. 
+# Этот файл содержит настройки проекта и валидацию переменных окружения с использованием Pydantic.
 # Он обеспечивает централизованное место для управления конфигурацией проекта.
 from typing import Literal
 from fastapi.security import OAuth2PasswordBearer
@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     @property
     def DATABASE_URL(self):
         return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
-    
+
     TEST_DB_HOST: str
     TEST_DB_PORT: int
     TEST_DB_USER: str

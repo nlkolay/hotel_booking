@@ -1,4 +1,4 @@
-# В этом файле определяются модели базы данных с использованием SQLAlchemy. 
+# В этом файле определяются модели базы данных с использованием SQLAlchemy.
 # Эти модели соответствуют таблицам в базе данных и используются для CRUD операций.
 
 from sqlalchemy import Integer, String, ForeignKey, Date, Computed, JSON
@@ -9,7 +9,7 @@ from datetime import date
 
 class Users(Base):
     __tablename__ = 'users'
-    
+
     id: Mapped[int] = mapped_column(primary_key=True)
     email: Mapped[str] = mapped_column(String, unique=True, index=True)
     hashed_password: Mapped[str] = mapped_column(String)
@@ -21,7 +21,7 @@ class Users(Base):
 
 class Hotels(Base):
     __tablename__ = "hotels"
-    
+
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String, index=True)
     location: Mapped[str] = mapped_column(String)
@@ -36,7 +36,7 @@ class Hotels(Base):
 
 class Rooms(Base):
     __tablename__ = "rooms"
-    
+
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     hotel_id: Mapped[int] = mapped_column(ForeignKey("hotels.id"))
     name: Mapped[str] = mapped_column(String)
@@ -54,7 +54,7 @@ class Rooms(Base):
 
 class Bookings(Base):
     __tablename__ = 'bookings'
-    
+
     id: Mapped[int] = mapped_column(primary_key=True)
     room_id: Mapped[int] = mapped_column(ForeignKey("rooms.id"))
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))

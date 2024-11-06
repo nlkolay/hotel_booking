@@ -9,7 +9,7 @@
     <div class="main">
         {% for hotel in hotels %}
         <div style="display: flex; margin-bottom: 10px;">
-            <img src="{{ url_for('static', path='images/' + hotel.image_id|string + '.webp')}}" 
+            <img src="{{ url_for('static', path='images/' + hotel.image_id|string + '.webp')}}"
             alt="Hotel photo" width="400">
             <div style="display:block; margin-left: 10px;">
                 <h1>{{hotel.name}}</h1>
@@ -17,6 +17,6 @@
             </div>
         </div>
         {% endfor %}
-    </div>    
+    </div>
 </body>
 </html>

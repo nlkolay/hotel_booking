@@ -50,7 +50,7 @@ async def prepare_database():
     def open_mock_json(model: str):
         with  open(f'app/tests/data/mock_{model}.json', 'r') as file:
             return json.load(file)
-        
+
     hotels = open_mock_json('hotels')
     rooms = open_mock_json('rooms')
     users = open_mock_json('users')
@@ -70,7 +70,7 @@ async def prepare_database():
         await  session.execute(add_rooms)
         await  session.execute(add_users)
         await  session.execute(add_bookings)
-        
+
         await  session.commit()
 
 
@@ -84,9 +84,9 @@ async def ac():
 async def authenticated_ac():
     async with AsyncClient(app=fastapi_app, base_url='http://test') as ac:
         await  ac.post(
-            "/auth/login", 
+            "/auth/login",
             json={
-                "email": "test@test.com", 
+                "email": "test@test.com",
                 "password": "test"}
                 )
         assert ac.cookies["session"]

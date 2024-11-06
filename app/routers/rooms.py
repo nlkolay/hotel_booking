@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Query
 from app.dao import HotelDAO
 from typing import List, Sequence
 
-from app.schemas import RoomBase, RoomResponse  
+from app.schemas import RoomBase, RoomResponse
 
 router = APIRouter()
 

@@ -1,8 +1,9 @@
 # Configure logging
 import logging
+from app.config import settings
 
 
-logging.basicConfig(level=logging.WARN)
+logging.basicConfig(level=settings.LOG_LEVEL)
 #logging.getLogger('sqlalchemy.engine').setLevel(logging.DEBUG)
 logger = logging.getLogger()
 

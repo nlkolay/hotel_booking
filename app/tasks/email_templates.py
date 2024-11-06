@@ -16,7 +16,7 @@ def create_booking_confirmation_template(
     email['From'] = settings.SMTP_USER
     email['To'] = email_to
 
-    
+
 
     email.set_content(
         f'''
@@ -40,7 +40,7 @@ def create_booking_reminder_template(
     email['From'] = settings.SMTP_USER
     email['To'] = email_to
 
-    
+
 
     email.set_content(
         f'''

@@ -32,7 +32,7 @@ async def register(
 
 @router.post("/login")
 async def login(
-    user_input: UserCreate, 
+    user_input: UserCreate,
     request: Request
     ) -> Optional[dict]:
     user = await authenticate_user(user_input.email, user_input.password)

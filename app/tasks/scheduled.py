@@ -1,4 +1,4 @@
-# Таски по расписанию для селери бит. 
+# Таски по расписанию для селери бит.
 # Из-за наличия обращений к бд необходим обход асинхронности или смеси движков, которые ломают Алхимию.
 import asyncio
 from os.path import isfile
@@ -18,7 +18,7 @@ def periodic_task(days_left: int): # Обход синхронности сел�
     loop = asyncio.get_event_loop()  # Get the current event loop
     loop.run_until_complete(run_periodic_task(days_left))  # Run the task on the current loop
 
-async def run_periodic_task(days_left: int):  
+async def run_periodic_task(days_left: int):
     async with AsyncSession(engine) as session:
         # Получаем пользователей с запланированным заездом на завтра
         bookings = await TaskDAO.get_booking_by_days_left(days_left)

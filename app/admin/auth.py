@@ -9,7 +9,7 @@ from app.config import settings
 
 class AdminAuth(AuthenticationBackend):
     async def login(
-            self, 
+            self,
             request: Request
             ) -> bool:
         form = await request.form()
@@ -25,7 +25,7 @@ class AdminAuth(AuthenticationBackend):
     async def logout(self, request: Request) -> bool:
         request.session.clear()
         return True
-    
+
     async def authenticate(self, request: Request) -> bool | RedirectResponse:
         try:
             user = await get_current_user(request)

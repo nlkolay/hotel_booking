@@ -1,5 +1,5 @@
-# Сервисы - слой логики для эндпоинтов, не привязанный к конкретному API. 
-# Вызывается роутером, обращается к 
+# Сервисы - слой логики для эндпоинтов, не привязанный к конкретному API.
+# Вызывается роутером, обращается к
 # DAO/Repo, внешнему API, другим сервисам и т.д.
 # Здесь для примера.
 
@@ -22,7 +22,7 @@ class BookingService:
         is_available = await BookingDAO.is_room_available(booking.room_id, booking.date_from, booking.date_to)
         if not is_available:
             raise RoomIsNotAvailable
-        
+
         price = await BookingDAO.get_price(booking.room_id)
 
         new_booking = await BookingDAO.add_booking(

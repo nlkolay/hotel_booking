@@ -26,27 +26,27 @@ celery.conf.beat_schedule ={
         #'schedule': '0 9 * * *',  # Every day at 9 AM
         'schedule': 5, #seconds
         #'schedule': crontab(minute=0, hour=9),
-    },    
+    },
     'send-1-day-reminder': {
         'task': 'days-left-reminder',
         'args': (1,),
         #'schedule': '0 9 * * *',  # Every day at 9 AM
         'schedule': 5, #seconds
         #'schedule': crontab(minute=0, hour=9),
-    },  
+    },
     'send-1-day-reminder': {
         'task': 'days-left-reminder',
         'args': (3,),
         #'schedule': '0 9 * * *',  # Every day at 9 AM
         'schedule': 5, #seconds
         #'schedule': crontab(minute=0, hour=9),
-    },  
+    },
     'send-1-day-reminder': {
         'task': 'days-left-reminder',
         'args': (1,),
         #'schedule': '0 9 * * *',  # Every day at 9 AM
         'schedule': 5, #seconds
         #'schedule': crontab(minute=0, hour=9),
-    },  
+    },
 }
 celery.conf.timezone = 'UTC'  # or any other timezone you need

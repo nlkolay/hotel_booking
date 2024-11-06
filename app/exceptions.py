@@ -6,7 +6,7 @@ from fastapi import HTTPException, status
 class Exception(HTTPException):
     status_code = status.HTTP_404_NOT_FOUND
     detail = ""
-    
+
     def __init__(self):
         super().__init__(status_code=self.status_code, detail=self.detail)
 
@@ -45,4 +45,3 @@ class DatesInvalid(Exception):
 class TooLong(Exception):
     status_code=status.HTTP_400_BAD_REQUEST
     detail="Длительность бронирования не может превышать 30 дней."
-

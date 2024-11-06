@@ -10,7 +10,7 @@ import pytest
 ])
 async def test_register_user(email: str, password: str, expected_status: int, ac: AsyncClient):
     """Test user registration with various email and password combinations."""
-    
+
     # Prepare the registration payload
     registration_payload = {
         'email': email,
@@ -31,7 +31,7 @@ async def test_register_user(email: str, password: str, expected_status: int, ac
 ])
 async def test_login_user(email: str, password: str, expected_status: int, ac: AsyncClient):
     """Test user login with various email and password combinations."""
-    
+
     # Prepare the login payload
     login_payload = {
         'email': email,

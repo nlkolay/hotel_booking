@@ -13,38 +13,38 @@ from app.database import AsyncSessionLocal
 
 class UserDAO:
     @classmethod
-    async def get_user_by_email(self, email: EmailStr) -> Optional[UserResponse]:
+    async def get_user_by_email(cls, email: EmailStr) -> Optional[UserResponse]:
         query = select(Users).where(Users.email == email)
         async with AsyncSessionLocal() as session:
             result = await session.execute(query)
         return result.scalar_one_or_none()
 
     @classmethod
-    async def create_user(self, email: EmailStr, hashed_password: str) -> UserResponse:
+    async def create_user(cls, email: EmailStr, hashed_password: str) -> UserResponse:
         user = Users(email=email, hashed_password=hashed_password)
         async with AsyncSessionLocal() as session:
             session.add(user)
             await session.commit()
             await session.refresh(user)
         return user
-    
+
 class HotelDAO:
     @classmethod
-    async def get_hotels(self) -> Sequence[HotelResponse]:
+    async def get_hotels(cls) -> Sequence[HotelResponse]:
         query = select(Hotels)
         async with AsyncSessionLocal() as session:
             result = await session.execute(query)
         return result.scalars().all()
 
     @classmethod
-    async def get_hotel_by_id(self, hotel_id: int) -> Sequence[HotelResponse]:
+    async def get_hotel_by_id(cls, hotel_id: int) -> Sequence[HotelResponse]:
         query = select(Hotels).where(Hotels.id == hotel_id)
         async with AsyncSessionLocal() as session:
             result = await session.execute(query)
         return result.scalars().all()
 
     @classmethod
-    async def search_for_hotels(self, location: str, date_from: date, date_to: date) -> Sequence[HotelResponse]: 
+    async def search_for_hotels(cls, location: str, date_from: date, date_to: date) -> Sequence[HotelResponse]:
         """
         Возвращает список отелей в указанном местоположении с доступными номерами на указанные даты.
 
@@ -57,7 +57,7 @@ class HotelDAO:
         # Подготовим подзапрос для поиска свободных номеров
         booked_rooms_cte = (
             select(
-                Bookings.room_id, 
+                Bookings.room_id,
                 func.count().label('booked_count')
                 )
             .where(
@@ -84,10 +84,10 @@ class HotelDAO:
         )
 
         # Основной запрос для получения отелей с доступными номерами и заданным местоположением
-        # TODO 
-        # 1. Использование полнотекстового поиска: Для более сложных запросов можно использовать функциональность полнотекстового 
+        # TODO
+        # 1. Использование полнотекстового поиска: Для более сложных запросов можно использовать функциональность полнотекстового
         # поиска, если это поддерживает используемая СУБД.
-        # 2. Преобразование в нормализованную форму: Чтобы искать вне зависимости от чисел, 
+        # 2. Преобразование в нормализованную форму: Чтобы искать вне зависимости от чисел,
         # диакритических знаков и других вариантов написания.
         query = (
             select(Hotels)
@@ -102,17 +102,17 @@ class HotelDAO:
         return hotels
 
     @classmethod
-    async def get_rooms_by_hotel_id(self, hotel_id: int) -> Sequence[RoomResponse]:
+    async def get_rooms_by_hotel_id(cls, hotel_id: int) -> Sequence[RoomResponse]:
         query = select(Rooms).where(Rooms.hotel_id == hotel_id)
         async with AsyncSessionLocal() as session:
             result = await session.execute(query)
         return result.scalars().all()
 
     @classmethod
-    async def search_for_rooms(self, hotel_id: int, date_from: date, date_to: date) -> Sequence[RoomResponse]:
+    async def search_for_rooms(cls, hotel_id: int, date_from: date, date_to: date) -> Sequence[RoomResponse]:
         booked_rooms_cte = (
             select(
-                Bookings.room_id, 
+                Bookings.room_id,
                 func.count().label('booked_count')
                 )
             .where(
@@ -146,13 +146,13 @@ class HotelDAO:
 class BookingDAO:
     # Пример с использованием relationship алхимии:
     @classmethod
-    async def get_bookings_by_user_id(self, user_id: int) -> Sequence[BookingResponseExtended]:
+    async def get_bookings_by_user_id(cls, user_id: int) -> Sequence[BookingResponseExtended]:
         query = (
             select(Bookings)
             .options(joinedload(Bookings.room))
             .options(joinedload(Bookings.room).subqueryload(Rooms.hotel))
             .where(Bookings.user_id == user_id)
-        )   
+        )
         # Который заменил:
         # query = (
         #     select(
@@ -165,9 +165,9 @@ class BookingDAO:
         async with AsyncSessionLocal() as session:
             result = await session.execute(query)
         return result.mappings().all()
-         
+
     @classmethod
-    async def add_booking(self, room_id: int, user_id: int, date_from: date, date_to: date, price: int) -> BookingBase:
+    async def add_booking(cls, room_id: int, user_id: int, date_from: date, date_to: date, price: int) -> BookingBase:
         booking = Bookings(room_id=room_id, user_id=user_id, date_from=date_from, date_to=date_to, price=price)
         async with AsyncSessionLocal() as session:
             session.add(booking)
@@ -176,20 +176,20 @@ class BookingDAO:
         return booking
 
     @classmethod
-    async def get_booking_by_id(self, booking_id: int) -> Optional[BookingResponseExtended]:
+    async def get_booking_by_id(cls, booking_id: int) -> Optional[BookingResponseExtended]:
         query = select(Bookings).where(Bookings.id == booking_id)
         async with AsyncSessionLocal() as session:
             result = await session.execute(query)
         return result.scalar_one_or_none()
 
     @classmethod
-    async def delete_booking(self, booking: Bookings)  -> None:
+    async def delete_booking(cls, booking: Bookings)  -> None:
         async with AsyncSessionLocal() as session:
             await session.delete(booking)
             await session.commit()
 
     @classmethod
-    async def is_room_available(self, room_id: int, date_from: date, date_to: date) -> bool:
+    async def is_room_available(cls, room_id: int, date_from: date, date_to: date) -> bool:
         subq = (
             select(func.count().label('booked_count'))
             .select_from(Bookings)
@@ -216,7 +216,7 @@ class BookingDAO:
             return result.scalar_one()
 
     @classmethod
-    async def get_price(self, room_id: int) -> int:
+    async def get_price(cls, room_id: int) -> int:
         query = select(Rooms.price).where(Rooms.id == room_id)
         async with AsyncSessionLocal() as session:
             result = await session.execute(query)
