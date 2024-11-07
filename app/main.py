@@ -15,6 +15,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from fastapi_cache.decorator import cache
+
+# from fastapi_versioning import VersionedFastAPI
 from redis import asyncio as aioredis
 from sqladmin import Admin
 from starlette.middleware.sessions import SessionMiddleware
@@ -60,10 +62,7 @@ async def lifespan(app: FastAPI):
     # async with AsyncSessionLocal() as session:
     #     await session.run_sync(Base.metadata.create_all)
     # asyncio.create_task(get_cache())
-    print("starting now")
-    #
     yield
-    #
     logger.info("Shutting down...")
     # Proper shutdown logic if needed (like closing connections)
 
@@ -97,10 +96,6 @@ app.add_middleware(
 
 app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 
-# pics
-
-app.mount("/static", StaticFiles(directory="app/static"), "static")
-
 # responses debug logger
 
 @app.middleware("http")
@@ -131,9 +126,19 @@ app.include_router(hotels.router, prefix="/hotels", tags=["hotels"])
 app.include_router(rooms.router, prefix="/rooms", tags=["rooms"])
 app.include_router(bookings.router, prefix="/bookings", tags=["bookings"])
 
+app.include_router(router_images)
+
 # Frontend routers
 # app.include_router(router_pages)
-# app.include_router(router_images)
+
+# app = VersionedFastAPI(app,
+#     version_format='{major}',
+#     prefix_format='/v{major}',
+#     # description='Greet users with a nice message',
+#     # middleware=[
+#     #     Middleware(SessionMiddleware, secret_key='mysecretkey')
+#     # ]
+# )
 
 admin = Admin(app, engine, authentication_backend=authentication_backend)
 
@@ -141,6 +146,9 @@ admin.add_view(UsersAdmin)
 admin.add_view(BookingsAdmin)
 admin.add_view(HotelsAdmin)
 admin.add_view(RoomsAdmin)
+
+# pics
+app.mount("/static", StaticFiles(directory="app/static"), "static")
 
 # TODO
 # +front,

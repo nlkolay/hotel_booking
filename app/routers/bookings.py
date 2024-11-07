@@ -3,6 +3,8 @@
 from typing import Dict, List, Sequence
 
 from fastapi import APIRouter, BackgroundTasks, Depends, status
+
+# from fastapi_versioning import version
 from pydantic import TypeAdapter, ValidationError
 
 from app.dao import BookingDAO
@@ -14,8 +16,8 @@ from app.services import BookingService
 
 router = APIRouter()
 
-
 @router.post("/create", status_code=status.HTTP_201_CREATED)
+# @version(1)
 async def new_booking(
     booking: BookingCreate,
     background_tasks: BackgroundTasks,
@@ -39,6 +41,7 @@ async def new_booking(
 
 
 @router.get("/")
+# @version(1)
 async def list_bookings(
     current_user: Users = Depends(get_current_user),
 ) -> Sequence[BookingResponseExtended]:
@@ -54,6 +57,7 @@ async def list_bookings(
 
 
 @router.delete("/{booking_id}", status_code=status.HTTP_204_NO_CONTENT)
+# @version(1)
 async def delete_booking(
     booking_id: int,
     current_user: Users = Depends(get_current_user)
