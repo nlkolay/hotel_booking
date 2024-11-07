@@ -1,8 +1,6 @@
 # Конфиг для селери и расписание бита
-from celery import Celery
-
 from app.config import settings
-
+from celery import Celery
 
 celery = Celery(
     "tasks",

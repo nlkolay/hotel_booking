@@ -1,0 +1,4 @@
+[tool.ruff]
+src = ["/app"]
+lint.ignore = ["F401", "E501", "B008"]
+lint.select = ["E", "F", "W", "I", "B", 'LOG', 'DTZ', 'ASYNC', 'UP']

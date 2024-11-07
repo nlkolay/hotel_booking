@@ -1,10 +1,10 @@
 from datetime import date, timedelta
 from typing import Optional, Sequence
+
+from app.database import AsyncSessionLocal
+from app.models import Bookings, Users
 from pydantic import EmailStr
 from sqlalchemy import select
-
-from app.models import Bookings, Users
-from app.database import AsyncSessionLocal
 
 
 class TaskDAO:

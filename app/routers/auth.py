@@ -1,14 +1,15 @@
 # Эндпоинты для аутентификации и авторизации пользователей, такие как регистрация, логин, получение информации о пользователе и выход из системы.
 
 from typing import Optional
-from fastapi import APIRouter, Depends, status, Request
-from app.dependencies import authenticate_user, create_access_token, get_current_user
+
+from email_validator import EmailNotValidError, validate_email
+from fastapi import APIRouter, Depends, Request, status
+
 from app.dao import UserDAO
-from email_validator import validate_email, EmailNotValidError
+from app.dependencies import authenticate_user, create_access_token, get_current_user
 from app.exceptions import EmailAlreadyUsed, EmailNotValid, InvalidCredentials
 from app.schemas import UserBase, UserCreate, UserResponse
 from app.utils import pwd_context
-
 
 router = APIRouter()
 

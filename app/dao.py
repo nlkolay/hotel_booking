@@ -1,12 +1,17 @@
 # - **`dao.py` (Data Access Object)**: Эти классы и методы обеспечивают абстракцию для выполнения запросов к базе данных.
 # Например, методы для получения пользователя по email, создания бронирования, проверки доступности номеров и т.д.
 
-from typing import Optional, Sequence
-from pydantic import EmailStr
-from sqlalchemy import and_, or_, select, func
-from sqlalchemy.orm import selectinload, joinedload
 from datetime import date
-from app.models import Users, Hotels, Rooms, Bookings
+from typing import Optional, Sequence
+
+from pydantic import EmailStr
+from sqlalchemy import and_, func, or_, select
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import joinedload, selectinload
+
+from app.database import AsyncSessionLocal
+from app.log import handler, logger
+from app.models import Bookings, Hotels, Rooms, Users
 from app.schemas import (
     BookingBase,
     BookingResponseExtended,
@@ -14,7 +19,6 @@ from app.schemas import (
     RoomResponse,
     UserResponse,
 )
-from app.database import AsyncSessionLocal
 
 
 class UserDAO:
@@ -177,11 +181,25 @@ class BookingDAO:
             date_to=date_to,
             price=price,
         )
-        async with AsyncSessionLocal() as session:
-            session.add(booking)
-            await session.commit()
-            await session.refresh(booking)
-        return booking
+        try:
+            async with AsyncSessionLocal() as session:
+                session.add(booking)
+                await session.commit()
+                await session.refresh(booking)
+                return booking
+        except (SQLAlchemyError, Exception) as e:
+            if isinstance(e, SQLAlchemyError):
+                msg = "Database Exc: Cannot add booking"
+            elif isinstance(e, Exception):
+                msg = "Unknown Exc: Cannot add booking"
+            extra = {
+                "user_id": user_id,
+                "room_id": room_id,
+                "date_from": date_from,
+                "date_to": date_to,
+            }
+            logger.error(msg, extra=extra, exc_info=True)
+
 
     @classmethod
     async def get_booking_by_id(
@@ -237,10 +255,13 @@ class BookingDAO:
             result = await session.execute(query)
         return result.scalar_one()
 
-    # TODO:
-    # непонятно как это сделать:
-    # AttributeError: 'classmethod' object has no attribute 'execute'
-    # переделать обращения к БД по образцу db from database.py
-    # async def session():
-    #     async with AsyncSessionLocal() as session:
-    #         yield session
+# TODO:
+# вырубить инфо лог алхимии хз как
+# add_booking log не работает
+#
+# непонятно как это сделать:
+# AttributeError: 'classmethod' object has no attribute 'execute'
+# переделать обращения к БД по образцу db from database.py
+# async def session():
+#     async with AsyncSessionLocal() as session:
+#         yield session

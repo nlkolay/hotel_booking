@@ -1,6 +1,7 @@
 from datetime import date
-from app.dao import BookingDAO
+
 import pytest
+from app.dao import BookingDAO
 
 
 @pytest.mark.parametrize(

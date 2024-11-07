@@ -1,5 +1,5 @@
+from app.models import Bookings, Hotels, Rooms, Users
 from sqladmin import ModelView
-from app.models import Bookings, Users, Rooms, Hotels
 
 
 class UsersAdmin(ModelView, model=Users):

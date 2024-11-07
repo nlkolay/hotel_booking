@@ -2,11 +2,12 @@
 # Из-за наличия обращений к бд необходим обход асинхронности или смеси движков, которые ломают Алхимию.
 import asyncio
 from os.path import isfile
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from app.tasks.dao import TaskDAO
-from app.tasks.celery_app import celery
-from app.tasks.email_templates import create_booking_reminder_template
+
 from app.config import settings
+from app.tasks.celery_app import celery
+from app.tasks.dao import TaskDAO
+from app.tasks.email_templates import create_booking_reminder_template
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 # Настройка базы данных
 DATABASE_URL = settings.DATABASE_URL  # Замените на вашу строку подключения

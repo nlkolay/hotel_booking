@@ -1,10 +1,10 @@
 # Этот файл содержит настройки проекта и валидацию переменных окружения с использованием Pydantic.
 # Он обеспечивает централизованное место для управления конфигурацией проекта.
 from typing import Literal
-from fastapi.security import OAuth2PasswordBearer
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from passlib.context import CryptContext
 
+from fastapi.security import OAuth2PasswordBearer
+from passlib.context import CryptContext
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
@@ -12,7 +12,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 class Settings(BaseSettings):
     MODE: Literal["DEV", "TEST", "PROD"]
-    LOG_LEVEL: str
+    LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
     DB_HOST: str
     DB_PORT: int
@@ -46,7 +46,7 @@ class Settings(BaseSettings):
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
 
-    SENTRY_DSN: str
+    BETTER_STACK_TOKEN: str
 
     FLOWER_UNAUTHENTICATED_API: bool
 

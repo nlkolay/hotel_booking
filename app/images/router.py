@@ -1,8 +1,6 @@
 import aiohttp
-from fastapi import APIRouter, UploadFile
-
 from app.tasks.tasks import process_pic
-
+from fastapi import APIRouter, UploadFile
 
 router = APIRouter(prefix="/images", tags=["Load images"])
 

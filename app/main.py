@@ -5,10 +5,12 @@
 # to start app:
 # uvicorn app.main:app --reload
 
+import time
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
@@ -21,10 +23,23 @@ from app.admin.auth import authentication_backend
 from app.admin.views import BookingsAdmin, HotelsAdmin, RoomsAdmin, UsersAdmin
 from app.config import settings
 from app.database import engine
+from app.images.router import router as router_images
 from app.log import handler, logger
 from app.pages.router import router as router_pages
-from app.images.router import router as router_images
 from app.routers import auth, bookings, hotels, rooms
+
+# For logging mgmt (ru 403):
+# import sentry_sdk
+# sentry_sdk.init(
+#     dsn=settings.SENTRY_DSN,
+#     # Set traces_sample_rate to 1.0 to capture 100%
+#     # of transactions for tracing.
+#     traces_sample_rate=1.0,
+#     # Set profiles_sample_rate to 1.0 to profile 100%
+#     # of sampled transactions.
+#     # We recommend adjusting this value in production.
+#     profiles_sample_rate=1.0,
+# )
 
 # Parallel with startup :
 # async def get_cache():
@@ -86,26 +101,29 @@ app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 
 app.mount("/static", StaticFiles(directory="app/static"), "static")
 
-# Ломает респонзы to front !!!!
 # responses debug logger
 
-# @app.middleware("http")
-# async def log_requests(request: Request, call_next):
-#     logger.info(f"Request: {request.method} {request.url}")
-#     logger.debug(f"Request headers: {request.headers}")
-#     logger.debug(f"Request body: {await request.body()}")
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    logger.debug(f"Request headers: {request.headers}")
+    logger.debug(f"Request body: {await request.body()}")
+    start_time  = time.time()
+    try:
+        response = await call_next(request)
+    except Exception as e:
+        logger.exception(f"Exception occurred: {e}")
+        return JSONResponse(content={"detail": str(e)}, status_code=500)
+    process_time =  time.time() - start_time
+    logger.info(
+        f"Request: {request.method} {request.url}",
+        extra={
+        "process_time": round(process_time, 4)
+        }
+        )
+    # async for chunk in response.body_iterator:
+    #     logger.debug(f"Response chunk: {chunk.decode()}") Ломает респонзы!!!
 
-#     try:
-#         response = await call_next(request)
-#     except Exception as e:
-#         logger.exception(f"Exception occurred: {e}")
-#         return JSONResponse(content={"detail": str(e)}, status_code=500)
-
-#     # Correctly log the response body
-#     async for chunk in response.body_iterator:
-#         logger.debug(f"Response chunk: {chunk.decode()}")
-
-#     return response
+    return response
 
 # Backend routers
 app.include_router(auth.router, prefix="/auth", tags=["auth"])

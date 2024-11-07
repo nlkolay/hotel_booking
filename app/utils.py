@@ -1,7 +1,7 @@
 # Вспомогательные функции, такие как хэширование паролей и валидация email. Эти функции помогают провести обработку данных перед сохранением их в базу данных или перед передачей клиенту.
 
+from email_validator import EmailNotValidError, validate_email
 from passlib.context import CryptContext
-from email_validator import validate_email, EmailNotValidError
 from sqlalchemy import inspect
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

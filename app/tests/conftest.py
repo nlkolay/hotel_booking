@@ -1,15 +1,16 @@
 # start: pytest -v [-s]
 import json
+from datetime import datetime
+
+import pytest
+from app.config import settings
+from app.database import AsyncSessionLocal, Base, engine
+from app.main import app as fastapi_app
+from app.models import Bookings, Hotels, Rooms, Users
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.inmemory import InMemoryBackend
-import pytest
-from datetime import datetime
-from sqlalchemy import insert
 from httpx import AsyncClient
-from app.main import app as fastapi_app
-from app.database import Base, AsyncSessionLocal, engine
-from app.config import settings
-from app.models import Users, Bookings, Hotels, Rooms
+from sqlalchemy import insert
 
 
 @pytest.fixture(autouse=True, scope="module")

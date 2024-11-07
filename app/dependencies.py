@@ -1,16 +1,18 @@
 # В этом файле содержатся зависимости и вспомогательные функции, такие как функции для аутентификации пользователей,
 # создание JWT токенов и валидация токенов. Эти функции используются для защиты маршрутов и аутентификации.
 
+from datetime import datetime, timedelta, timezone
 from typing import Optional
+
 from fastapi import Depends, Request
 from jose import JWTError, jwt
 from pydantic import EmailStr
 from sqlalchemy.future import select
+
+from app.config import pwd_context, settings
 from app.database import AsyncSessionLocal
 from app.exceptions import InvalidCredentials, NotLoggedIn
 from app.models import Users
-from datetime import datetime, timedelta, timezone
-from app.config import settings, pwd_context
 from app.schemas import UserResponse
 
 

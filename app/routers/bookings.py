@@ -1,17 +1,16 @@
 # Эндпоинты для управления бронированиями, включая создание, получение списка и удаление бронирований.
 
+from typing import Dict, List, Sequence
+
 from fastapi import APIRouter, BackgroundTasks, Depends, status
+from pydantic import TypeAdapter, ValidationError
+
 from app.dao import BookingDAO
 from app.dependencies import get_current_user
 from app.exceptions import BookingNotFound
 from app.models import Bookings, Rooms, Users
 from app.schemas import BookingBase, BookingCreate, BookingResponseExtended
-from typing import List, Dict, Sequence
-
-from pydantic import TypeAdapter, ValidationError
-
 from app.services import BookingService
-
 
 router = APIRouter()
 
@@ -41,7 +40,7 @@ async def new_booking(
 
 @router.get("/")
 async def list_bookings(
-    current_user=Depends(get_current_user),
+    current_user: Users = Depends(get_current_user),
 ) -> Sequence[BookingResponseExtended]:
     bookings = await BookingDAO.get_bookings_by_user_id(current_user.id)
     # Выше пример с использованием relationship алхимии
@@ -55,7 +54,10 @@ async def list_bookings(
 
 
 @router.delete("/{booking_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_booking(booking_id: int, current_user=Depends(get_current_user)):
+async def delete_booking(
+    booking_id: int,
+    current_user: Users = Depends(get_current_user)
+    ) -> None:
     booking = await BookingDAO.get_booking_by_id(booking_id)
     if booking is None or booking.user_id != current_user.id:
         raise BookingNotFound

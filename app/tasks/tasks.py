@@ -1,13 +1,14 @@
 # Обычные отложенные таски для селери.
 # Нет обращений к бд, нет Алхимии, нет обхода асинхронности или смеси движков, как в scheduled.py
 import smtplib
-from pydantic import EmailStr
+from pathlib import Path
+
 from app.config import settings
 from app.models import Bookings
 from app.tasks.celery_app import celery
-from PIL import Image
-from pathlib import Path
 from app.tasks.email_templates import create_booking_confirmation_template
+from PIL import Image
+from pydantic import EmailStr
 
 
 @celery.task

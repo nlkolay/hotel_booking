@@ -1,15 +1,35 @@
-# Configure logging
 import logging
+from datetime import datetime, timezone
+
+from logtail import LogtailHandler
+from pythonjsonlogger import jsonlogger
+
 from app.config import settings
 
-
-logging.basicConfig(level=settings.LOG_LEVEL)
-# logging.getLogger('sqlalchemy.engine').setLevel(logging.DEBUG)
 logger = logging.getLogger()
 
-# Create a handler (e.g., to write logs to a file)
-handler = logging.FileHandler("my_app.log")
-handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
+handler = logging.StreamHandler() # To terminal or Sentry
 
-# Add the handler to the logger
-# logger.addHandler(handler)
+# handler = LogtailHandler(source_token=settings.BETTER_STACK_TOKEN) #  To Better Stack
+logger.handlers = []
+
+
+class CustomJsonFormatter(jsonlogger.JsonFormatter):
+    def add_fields(self, log_record, record, message_dict):
+        super().add_fields(log_record, record, message_dict)
+        if not log_record.get("timestamp"):
+            now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+            log_record["timestamp"] = now
+        if log_record.get("level"):
+            log_record["level"] = log_record["level"].upper()
+        else:
+            log_record["level"] = record.levelname
+
+
+formatter = CustomJsonFormatter(
+    "%(timestamp)s %(level)s %(message)s %(module)s %(funcName)s"
+)
+
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.setLevel(settings.LOG_LEVEL)

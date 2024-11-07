@@ -4,10 +4,11 @@
 # Здесь для примера.
 
 from fastapi import BackgroundTasks
+
+from app.dao import BookingDAO
 from app.exceptions import RoomIsNotAvailable
 from app.models import Users
-from app.schemas import BookingCreate
-from app.dao import BookingDAO
+from app.schemas import BookingBase, BookingCreate
 
 
 class BookingService:
@@ -17,7 +18,7 @@ class BookingService:
         booking: BookingCreate,
         background_tasks: BackgroundTasks,
         current_user: Users,
-    ):
+    ) -> BookingBase:
         # Проверка доступности комнаты
         is_available = await BookingDAO.is_room_available(
             booking.room_id, booking.date_from, booking.date_to

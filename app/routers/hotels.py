@@ -1,11 +1,12 @@
 # Эндпоинты для работы с отелями, такие как получение списка отелей и комнат в отеле.
 
 from datetime import date, datetime
-from fastapi import APIRouter, Depends, Query
-from app.dao import HotelDAO
 from typing import List, Sequence
+
+from fastapi import APIRouter, Depends, Query
 from fastapi_cache.decorator import cache
 
+from app.dao import HotelDAO
 from app.exceptions import DatesInvalid, NoVacation, TooLong
 from app.schemas import HotelResponse
 

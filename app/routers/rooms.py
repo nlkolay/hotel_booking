@@ -1,10 +1,11 @@
 # Эндпоинты для работы с информацией о комнатах в отелях.
 
 from datetime import date, datetime
-from fastapi import APIRouter, Depends, Query
-from app.dao import HotelDAO
 from typing import List, Sequence
 
+from fastapi import APIRouter, Depends, Query
+
+from app.dao import HotelDAO
 from app.schemas import RoomBase, RoomResponse
 
 router = APIRouter()

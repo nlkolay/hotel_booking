@@ -1,9 +1,8 @@
 from email.message import EmailMessage
 
-from pydantic import EmailStr
-
 from app.config import settings
 from app.models import Bookings
+from pydantic import EmailStr
 
 
 def create_booking_confirmation_template(

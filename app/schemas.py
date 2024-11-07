@@ -1,9 +1,10 @@
 # Здесь определены схемы Pydantic, которые используются для валидации данных, получаемых и отправляемых через API.
 # Эти схемы описывают структуру данных, которая будет передаваться между клиентом и сервером.
 
-from pydantic import BaseModel
-from typing import List, Optional
 from datetime import date
+from typing import List, Optional
+
+from pydantic import BaseModel
 
 
 class UserCreate(BaseModel):
