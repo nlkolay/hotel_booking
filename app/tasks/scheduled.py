@@ -26,7 +26,7 @@ def periodic_task(days_left: int):  # Обход синхронности сел
 
 
 async def run_periodic_task(days_left: int):
-    async with AsyncSession(engine) as session:
+    async with AsyncSession(engine):
         # Получаем пользователей с запланированным заездом на завтра
         bookings = await TaskDAO.get_booking_by_days_left(days_left)
         if bookings is not None:
