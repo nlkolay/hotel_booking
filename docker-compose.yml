@@ -1,32 +1,32 @@
 services:
   db:
-    image: postgres:15
+    image: postgres:15-alpine
     container_name: booking_db
-    env_file:
-      - .env-prod
-    ports:
-      - "5432:5432"
+    env_file: .env-prod
+    ports: ["5432:5432"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d booking_app"]
-      interval: 2s
+      interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 3
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Указываем volume для хранения данных
 
   redis:
-    image: redis:7
+    image: redis:7-alpine
     container_name: booking_redis
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 2s
-      timeout: 3s
-      retries: 5
+      interval: 5s
+      timeout: 5s
+      retries: 3
 
   booking:
     build:
       context: .
+      dockerfile: Dockerfile
     container_name: booking_app
-    env_file:
-      - .env-prod
+    env_file: .env-prod
     depends_on:
       db:
         condition: service_healthy
@@ -39,22 +39,28 @@ services:
   celery:
     build:
       context: .
+      dockerfile: Dockerfile
     container_name: booking_celery
+    env_file: .env-prod
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
-    env_file:
-      - .env-prod
     command: sh -c "celery --app=app.tasks.celery_app:celery worker -l INFO"
 
   flower:
     build:
       context: .
+      dockerfile: Dockerfile
     container_name: booking_flower
     depends_on:
       - celery
     env_file:
       - .env-prod
     command: sh -c "celery --app=app.tasks.celery_app:celery flower"
+    ports: ["5555:5555"]
+
+
+volumes:
+  postgres_data:  # Определяем volume

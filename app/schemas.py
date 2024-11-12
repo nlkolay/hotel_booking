@@ -1,10 +1,9 @@
 # Здесь определены схемы Pydantic, которые используются для валидации данных, получаемых и отправляемых через API.
 # Эти схемы описывают структуру данных, которая будет передаваться между клиентом и сервером.
-
 from datetime import date
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class UserCreate(BaseModel):
@@ -25,18 +24,18 @@ class UserResponse(UserBase):
 class TokenDepr(BaseModel):
     access_token: str
 
-
-class HotelResponse(BaseModel):
-    id: int
+class HotelBase(BaseModel):
     name: str
     location: str
     services: List[str]
     rooms_quantity: int
     image_id: int
 
+class HotelResponse(HotelBase):
+    pass
 
 class RoomBase(BaseModel):
-    id: int
+    id: Optional[int] = None
     hotel_id: int
     name: str
     description: Optional[str]
@@ -57,11 +56,11 @@ class BookingCreate(BaseModel):
 
 
 class BookingBase(BookingCreate):
-    id: int
+    id: Optional[int] = None
     user_id: int
     price: int
-    total_cost: int
-    total_days: int
+    total_cost: Optional[int] = None
+    total_days: Optional[int] = None
 
 
 class BookingResponse(BookingBase):

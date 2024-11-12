@@ -25,10 +25,9 @@ from app.admin.auth import authentication_backend
 from app.admin.views import BookingsAdmin, HotelsAdmin, RoomsAdmin, UsersAdmin
 from app.config import settings
 from app.database import engine
-from app.images.router import router as router_images
 from app.log import handler, logger
 from app.pages.router import router as router_pages
-from app.routers import auth, bookings, hotels, rooms
+from app.routers import auth, bookings, hotels, rooms, utils
 
 # For logging mgmt (ru 403):
 # import sentry_sdk
@@ -126,7 +125,7 @@ app.include_router(hotels.router, prefix="/hotels", tags=["hotels"])
 app.include_router(rooms.router, prefix="/rooms", tags=["rooms"])
 app.include_router(bookings.router, prefix="/bookings", tags=["bookings"])
 
-app.include_router(router_images)
+app.include_router(utils.router)
 
 # Frontend routers
 # app.include_router(router_pages)
