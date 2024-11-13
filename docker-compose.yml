@@ -22,6 +22,7 @@ services:
       retries: 3
 
   booking:
+    image: booking_backend
     build:
       context: .
       dockerfile: Dockerfile
@@ -37,6 +38,7 @@ services:
       - 8000:8000
 
   celery:
+    image: booking_backend:latest
     build:
       context: .
       dockerfile: Dockerfile
@@ -50,6 +52,7 @@ services:
     command: sh -c "celery --app=app.tasks.celery_app:celery worker -l INFO"
 
   flower:
+    image: booking_backend:latest
     build:
       context: .
       dockerfile: Dockerfile
