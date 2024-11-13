@@ -25,6 +25,7 @@ class TokenDepr(BaseModel):
     access_token: str
 
 class HotelBase(BaseModel):
+    id: Optional[int] = None
     name: str
     location: str
     services: List[str]

@@ -26,7 +26,7 @@ class Users(Base):
 class Hotels(Base):
     __tablename__ = "hotels"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String, index=True)
     location: Mapped[str] = mapped_column(String)
     services: Mapped[list[str]] = mapped_column(JSON)
@@ -42,7 +42,7 @@ class Hotels(Base):
 class Rooms(Base):
     __tablename__ = "rooms"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
     hotel_id: Mapped[int] = mapped_column(ForeignKey("hotels.id"))
     name: Mapped[str] = mapped_column(String)
     description: Mapped[Optional[str]] = mapped_column(String, nullable=True)
