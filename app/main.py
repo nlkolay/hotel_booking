@@ -15,6 +15,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from fastapi_cache.decorator import cache
+from prometheus_fastapi_instrumentator import Instrumentator
 
 # from fastapi_versioning import VersionedFastAPI
 from redis import asyncio as aioredis
@@ -27,7 +28,7 @@ from app.config import settings
 from app.database import engine
 from app.log import handler, logger
 from app.pages.router import router as router_pages
-from app.routers import auth, bookings, hotels, rooms, utils
+from app.routers import auth, bookings, hotels, prometheus, rooms, utils
 
 # For logging mgmt (ru 403):
 # import sentry_sdk
@@ -93,9 +94,12 @@ app.add_middleware(
     ],  # Allow headers
 )
 
+# For user session control:
+
 app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 
-# responses debug logger
+# Responses debug logger:
+# WARN: If commented, prometheus metrics will show constant rate of 500...
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
@@ -108,7 +112,7 @@ async def log_requests(request: Request, call_next):
         logger.exception(f"Exception occurred: {e}")
         return JSONResponse(content={"detail": str(e)}, status_code=500)
     process_time =  time.time() - start_time
-    logger.info(
+    logger.debug(
         f"Request: {request.method} {request.url}",
         extra={
         "process_time": round(process_time, 4)
@@ -119,6 +123,12 @@ async def log_requests(request: Request, call_next):
 
     return response
 
+instrumentator = Instrumentator(
+    should_group_status_codes=False,
+    excluded_handlers=[".*admin.*", "/metrics"],
+)
+instrumentator.instrument(app).expose(app)
+
 # Backend routers
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(hotels.router, prefix="/hotels", tags=["hotels"])
@@ -126,6 +136,7 @@ app.include_router(rooms.router, prefix="/rooms", tags=["rooms"])
 app.include_router(bookings.router, prefix="/bookings", tags=["bookings"])
 
 app.include_router(utils.router)
+app.include_router(prometheus.router)
 
 # Frontend routers
 # app.include_router(router_pages)

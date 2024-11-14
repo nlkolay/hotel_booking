@@ -58,6 +58,7 @@ platformdirs==4.3.6
 pluggy==1.5.0
 pre_commit==4.0.1
 prometheus_client==0.21.0
+prometheus_fastapi_instrumentator==7.0.0
 prompt_toolkit==3.0.48
 pyasn1==0.6.1
 pycparser==2.22
