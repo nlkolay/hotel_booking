@@ -49,21 +49,25 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
 
 
 async def get_current_user(request: Request) -> Optional[UserResponse]:
-    # token: Token = await get_token(request)
-    token: str = request.session.get("token")
+    token: str = request.cookies.get("token")  # Use cookies instead of session
     if token is None:
-        raise NotLoggedIn
+        raise NotLoggedIn()
+
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, settings.ALGORITHM)
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         email: EmailStr = payload.get("sub")
         if email is None:
-            raise InvalidCredentials
-        query = select(Users).where(Users.email == email)
+            raise InvalidCredentials()
+
         async with AsyncSessionLocal() as session:
+            query = select(Users).where(Users.email == email)
             result = await session.execute(query)
-        user = result.scalar_one_or_none()
+            user = result.scalar_one_or_none()
+
         if user is None:
-            raise InvalidCredentials
+            raise InvalidCredentials()
+
     except JWTError:
-        raise InvalidCredentials
+        raise InvalidCredentials()
+
     return user

@@ -27,27 +27,28 @@ async def register(user: UserCreate) -> dict:
         raise EmailAlreadyUsed
 
     hashed_password = pwd_context.hash(user.password)
-    new_user = await UserDAO.create_user(email, hashed_password)
+    await UserDAO.create_user(email, hashed_password)
     return {"message": "Пользователь создан."}
 
 
 @router.post("/login")
-async def login(user_input: UserCreate, request: Request, response: Response) -> Optional[dict]:
+async def login(user_input: UserCreate, request: Request, response: Response) -> dict:
     user = await authenticate_user(user_input.email, user_input.password)
     if not user:
-        raise InvalidCredentials
+        raise InvalidCredentials()
+
     access_token = create_access_token({"sub": str(user.email)})
 
     # Set cookie in response
-    # request.session.update({"token": access_token})
     response.set_cookie(
-    key="session",
-    value=access_token,
-    httponly=True,
-    secure=True,  # Set to True if using HTTPS
-    samesite="None"  # Use "Lax" or "Strict" if not cross-origin
+        key="token",
+        value=access_token,
+        httponly=True,
+        secure=True,  # Use a setting to determine if HTTPS is used
+        samesite="None"  # Adjust based on your CORS policy
     )
     return {"token": access_token}
+
 
 
 @router.get("/account")
