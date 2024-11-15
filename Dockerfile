@@ -25,9 +25,8 @@ COPY . .
 # Установка прав и очистка
 RUN chmod +x entrypoint.sh && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/* \
-    alembic upgrade head
+    rm -rf /var/lib/apt/lists/*
 
-CMD ["gunicorn", "app.main:app", "--workers", "1", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind=0.0.0.0:8000"]
+CMD ["./entrypoint.sh"]
 
 EXPOSE 8000
