@@ -3,7 +3,7 @@
 from typing import Optional
 
 from email_validator import EmailNotValidError, validate_email
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Depends, Request, Response, status
 
 from app.dao import UserDAO
 from app.dependencies import authenticate_user, create_access_token, get_current_user
@@ -32,14 +32,21 @@ async def register(user: UserCreate) -> dict:
 
 
 @router.post("/login")
-async def login(user_input: UserCreate, request: Request) -> Optional[dict]:
+async def login(user_input: UserCreate, request: Request, response: Response) -> Optional[dict]:
     user = await authenticate_user(user_input.email, user_input.password)
     if not user:
         raise InvalidCredentials
     access_token = create_access_token({"sub": str(user.email)})
 
     # Set cookie in response
-    request.session.update({"token": access_token})
+    # request.session.update({"token": access_token})
+    response.set_cookie(
+    key="session",
+    value=access_token,
+    httponly=True,
+    secure=True,  # Set to True if using HTTPS
+    samesite="None"  # Use "Lax" or "Strict" if not cross-origin
+    )
     return {"token": access_token}
 
 
