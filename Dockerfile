@@ -23,6 +23,10 @@ RUN pip install --no-cache /wheels/*
 COPY . .
 
 # Установка прав и очистка
-RUN chmod +x entrypoint.sh
+RUN chmod +x entrypoint.sh && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+CMD ["gunicorn", "app.main:app", "--workers", "1", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind=0.0.0.0:8000"]
 
 EXPOSE 8000
