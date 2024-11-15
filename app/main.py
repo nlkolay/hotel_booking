@@ -71,6 +71,7 @@ app = FastAPI(title="Бронированией отелей Bronenosets", lifes
 
 origins = [
     "http://localhost:3000",
+    "https://hotel-booking-frontend-pt56.onrender.com"
 ]
 
 app.add_middleware(

@@ -1,7 +1,7 @@
 #!/bin/sh
 
-# Ожидание запуска базы данных
-python wait_for_postgres.py
+# TODO Ожидание запуска базы данных
+# python wait_for_postgres.py
 
 # Выполнение миграций
 alembic upgrade head
