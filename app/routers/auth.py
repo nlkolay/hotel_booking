@@ -59,6 +59,6 @@ async def get_account_details(
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
-async def logout(request: Request) -> None:
-    request.session.clear()
-    return
+async def logout(self, response: Response) -> bool:
+    response.delete_cookie(key="token")
+    return True
