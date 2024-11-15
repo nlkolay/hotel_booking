@@ -1,5 +1,4 @@
 my_app.log
-.env
-.env-prod
+.env*
 favicon.ico
 *cache*
