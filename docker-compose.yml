@@ -1,4 +1,15 @@
 services:
+  nginx:
+    build:
+      context: .
+      dockerfile: "Dockerfile.nginx"
+    container_name: booking_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    links:
+      - booking
+
   db:
     image: postgres:15-alpine
     container_name: booking_db
@@ -34,11 +45,11 @@ services:
       redis:
         condition: service_healthy
     command: sh -c "alembic upgrade head && gunicorn app.main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000"
-    ports:
-      - 8000:8000
+    # ports:
+    #   - 8000:8000
 
   celery:
-    image: booking_backend:latest
+    image: booking_backend
     build:
       context: .
       dockerfile: Dockerfile
@@ -62,34 +73,34 @@ services:
     env_file:
       - .env-prod
     command: sh -c "celery --app=app.tasks.celery_app:celery flower"
-    ports: ["5555:5555"]
+    # ports: ["5555:5555"]
 
-  prometheus:  # Define the Prometheus service
-    image: prom/prometheus  # Use the official Prometheus image
-    container_name: prometheus
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus_data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-    ports:
-      - "9090:9090"  # Expose Prometheus on port 9090
-    restart: unless-stopped
+  # prometheus:  # Define the Prometheus service
+  #   image: prom/prometheus  # Use the official Prometheus image
+  #   container_name: prometheus
+  #   volumes:
+  #     - ./prometheus.yml:/etc/prometheus/prometheus.yml
+  #     - prometheus_data:/prometheus
+  #   command:
+  #     - '--config.file=/etc/prometheus/prometheus.yml'
+  #   ports:
+  #     - "9090:9090"  # Expose Prometheus on port 9090
+  #   restart: unless-stopped
 
-  grafana:  # Define the Grafana service
-    image: grafana/grafana # Use the official Grafana image
-    container_name: grafana
-    ports:
-      - "3030:3000"  # Expose Grafana on port 3000
-    depends_on:
-      - prometheus  # Ensure Prometheus starts before Grafana
-    volumes:
-      - grafana_data:/var/lib/grafana
-    environment:
-      - GF_LOG_LEVEL=warning
-    restart: unless-stopped
+  # grafana:  # Define the Grafana service
+  #   image: grafana/grafana # Use the official Grafana image
+  #   container_name: grafana
+  #   ports:
+  #     - "3030:3000"  # Expose Grafana on port 3000
+  #   depends_on:
+  #     - prometheus  # Ensure Prometheus starts before Grafana
+  #   volumes:
+  #     - grafana_data:/var/lib/grafana
+  #   environment:
+  #     - GF_LOG_LEVEL=warning
+  #   restart: unless-stopped
 
 volumes:
   postgres_data:  # Определяем volume for DB
-  prometheus_data:
-  grafana_data:
+  # prometheus_data:
+  # grafana_data:

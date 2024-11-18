@@ -27,7 +27,7 @@ async def register(user: UserCreate) -> dict:
         raise EmailAlreadyUsed
 
     hashed_password = pwd_context.hash(user.password)
-    new_user = await UserDAO.create_user(email, hashed_password)
+    await UserDAO.create_user(email, hashed_password)
     return {"message": "Пользователь создан."}
 
 

@@ -25,7 +25,7 @@ class AdminAuth(AuthenticationBackend):
 
     async def authenticate(self, request: Request) -> bool | RedirectResponse:
         try:
-            user = await get_current_user(request)
+            await get_current_user(request)
         except HTTPException as exc:
             if exc.status_code == 401:
                 return RedirectResponse(request.url_for("admin:login"), status_code=302)

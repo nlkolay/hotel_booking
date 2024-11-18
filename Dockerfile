@@ -29,4 +29,4 @@ RUN chmod +x entrypoint.sh && \
 
 CMD ["./entrypoint.sh"]
 
-EXPOSE 8000
+# EXPOSE 8000

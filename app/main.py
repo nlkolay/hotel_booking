@@ -10,6 +10,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi_cache import FastAPICache
@@ -123,6 +124,12 @@ async def log_requests(request: Request, call_next):
     #     logger.debug(f"Response chunk: {chunk.decode()}") Ломает респонзы!!!
 
     return response
+
+# If behind a proxy, configure trusted hosts
+# app.add_middleware(
+#     TrustedHostMiddleware,
+#     allowed_hosts=origins
+# )
 
 instrumentator = Instrumentator(
     should_group_status_codes=False,
