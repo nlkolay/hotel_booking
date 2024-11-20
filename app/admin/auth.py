@@ -8,26 +8,18 @@ from sqladmin.authentication import AuthenticationBackend
 
 
 class AdminAuth(AuthenticationBackend):
-    async def login(self, request: Request, response: Response) -> bool:
+    async def login(self, request: Request) -> bool:
         form = await request.form()
         email, password = str(form["username"]), str(form["password"])
 
         user = await authenticate_user(email, password)
         if user:
             access_token = create_access_token({"sub": str(user.email)})
-            #request.session.update({"token_admin": access_token})
-            # Set cookie in response
-            response.set_cookie(
-                key="token",
-                value=access_token,
-                httponly=True,
-                secure=True,  # Use a setting to determine if HTTPS is used
-                samesite="None"  # Adjust based on your CORS policy
-            )
+            request.session.update({"token_admin": access_token})
         return True
 
-    async def logout(self, response: Response) -> bool:
-        response.delete_cookie(key="token")
+    async def logout(self, request: Request) -> bool:
+        request.session.clear()
         return True
 
     async def authenticate(self, request: Request) -> bool | RedirectResponse:
