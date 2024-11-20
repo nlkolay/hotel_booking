@@ -67,7 +67,7 @@ async def lifespan(app: FastAPI):
     # Proper shutdown logic if needed (like closing connections)
 
 
-app = FastAPI(title="Бронированией отелей Bronenosets", lifespan=lifespan)
+app = FastAPI(title="Бронирование отелей Bronenosets", lifespan=lifespan)
 
 origins = [
     "http://localhost:3000",
