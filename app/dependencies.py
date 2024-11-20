@@ -54,7 +54,9 @@ async def get_current_user(request: Request) -> Optional[UserResponse]:
         raise NotLoggedIn()
 
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        payload = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+        )
         email: EmailStr = payload.get("sub")
         if email is None:
             raise InvalidCredentials()
@@ -70,4 +72,25 @@ async def get_current_user(request: Request) -> Optional[UserResponse]:
     except JWTError:
         raise InvalidCredentials()
 
+    return user
+
+
+async def get_current_user_session(request: Request) -> Optional[UserResponse]:
+    # token: Token = await get_token(request)
+    token: str = request.session.get("token_admin")
+    if token is None:
+        raise NotLoggedIn
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, settings.ALGORITHM)
+        email: EmailStr = payload.get("sub")
+        if email is None:
+            raise InvalidCredentials
+        query = select(Users).where(Users.email == email)
+        async with AsyncSessionLocal() as session:
+            result = await session.execute(query)
+        user = result.scalar_one_or_none()
+        if user is None:
+            raise InvalidCredentials
+    except JWTError:
+        raise InvalidCredentials
     return user
