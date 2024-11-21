@@ -4,6 +4,8 @@ services:
       context: .
       dockerfile: "Dockerfile.nginx"
     container_name: booking_nginx
+    environment:
+      - CERTBOT_EMAIL=klushka50@gmail.com
     ports:
       - "8080:80"
       - "8443:443"
@@ -12,8 +14,8 @@ services:
     depends_on:
       - booking
     volumes:
-      - ./certs:/etc/nginx/certs
-    restart: always
+      - nginx_secrets:/etc/letsencrypt
+    restart: unless-stopped
 
   db:
     image: postgres:15-alpine
@@ -109,3 +111,4 @@ volumes:
   postgres_data:
   prometheus_data:
   grafana_data:
+  nginx_secrets:
