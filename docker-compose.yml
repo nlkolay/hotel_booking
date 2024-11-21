@@ -11,12 +11,15 @@ services:
       - booking
     depends_on:
       - booking
+    volumes:
+      - ./certs:/etc/nginx/certs
+    restart: always
 
   db:
     image: postgres:15-alpine
     container_name: booking_db
     env_file: .env-prod
-    # ports: ["5432:5432"]
+    ports: ["45050:5432"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
       interval: 5s
@@ -64,17 +67,17 @@ services:
         condition: service_healthy
     command: sh -c "celery --app=app.tasks.celery_app:celery worker -l INFO"
 
-  # flower:
-  #   image: booking_backend:latest
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   container_name: booking_flower
-  #   depends_on:
-  #     - celery
-  #   env_file:
-  #     - .env-prod
-  #   command: sh -c "celery --app=app.tasks.celery_app:celery flower"
+  flower:
+    image: booking_backend:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: booking_flower
+    depends_on:
+      - celery
+    env_file:
+      - .env-prod
+    command: sh -c "celery --app=app.tasks.celery_app:celery flower"
   #   ports: ["5555:5555"]
 
   prometheus:  # Define the Prometheus service
@@ -92,8 +95,8 @@ services:
   grafana:  # Define the Grafana service
     image: grafana/grafana # Use the official Grafana image
     container_name: grafana
-    ports:
-      - "3030:3000"  # Expose Grafana on port 3030
+    # ports:
+    #   - "3030:3000"  # Expose Grafana on port 3030
     depends_on:
       - prometheus  # Ensure Prometheus starts before Grafana
     volumes:
