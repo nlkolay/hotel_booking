@@ -4,8 +4,6 @@ services:
       context: .
       dockerfile: "Dockerfile.nginx"
     container_name: booking_nginx
-    environment:
-      - CERTBOT_EMAIL=klushka50@gmail.com
     ports:
       - "8080:80"
       - "8443:443"
@@ -13,19 +11,19 @@ services:
       - booking
     depends_on:
       - booking
-      - certbot
+      # - certbot
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./html:/app/static/html  # Папка для статических файлов
-      - nginx_secrets:/etc/letsencrypt
+      # - ./html:/app/static/html  # Папка для статических файлов
+      # - nginx_secrets:/etc/letsencrypt
     # restart: unless-stopped
 
-  certbot:
-    image: certbot/certbot
-    volumes:
-      - nginx_secrets:/etc/letsencrypt  # Папка для хранения сертификатов
-      - ./nginx.conf:/etc/nginx/nginx.conf  # Путь к конфигурации Nginx
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+  # certbot:
+  #   image: certbot/certbot
+  #   volumes:
+  #     - nginx_secrets:/etc/letsencrypt  # Папка для хранения сертификатов
+  #     - ./nginx.conf:/etc/nginx/nginx.conf  # Путь к конфигурации Nginx
+  #   entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
   db:
     image: postgres:15-alpine
