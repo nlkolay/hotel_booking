@@ -2,7 +2,11 @@
 
 An asynchronous FastAPI application for hotel room booking using PostgreSQL, Pydantic, SQLAlchemy, and JWT authentication.
 
+Dev run:
 uvicorn app.main:app --reload
+
+SSL certs init:
+docker-compose run --rm certbot certonly --nginx -d bronenosets.duckdns.org
 
 для чего нужен каждый из файлов
 
