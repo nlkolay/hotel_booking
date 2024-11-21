@@ -16,6 +16,7 @@ services:
       - certbot
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./html:/app/static/html  # Папка для статических файлов
       - nginx_secrets:/etc/letsencrypt
     # restart: unless-stopped
 

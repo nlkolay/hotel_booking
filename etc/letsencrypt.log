@@ -1,0 +1,240 @@
+2024-11-21 16:28:54,260:DEBUG:certbot._internal.main:certbot version: 2.1.0
+2024-11-21 16:28:54,260:DEBUG:certbot._internal.main:Location of certbot entry point: /usr/bin/certbot
+2024-11-21 16:28:54,260:DEBUG:certbot._internal.main:Arguments: ['--nginx', '-d', 'bronenosets.duckdns.org', '-d', 'api-bronenosets.duckdns.org', '--logs-dir', 'etc']
+2024-11-21 16:28:54,260:DEBUG:certbot._internal.main:Discovered plugins: PluginsRegistry(PluginEntryPoint#manual,PluginEntryPoint#null,PluginEntryPoint#standalone,PluginEntryPoint#webroot)
+2024-11-21 16:28:54,269:DEBUG:certbot._internal.log:Root logging level set at 30
+2024-11-21 16:28:54,269:DEBUG:certbot.util:Exception was:
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/certbot/util.py", line 179, in set_up_core_dir
+    lock_dir_until_exit(directory)
+  File "/usr/lib/python3/dist-packages/certbot/util.py", line 153, in lock_dir_until_exit
+    _LOCKS[dir_path] = lock.lock_dir(dir_path)
+                       ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/certbot/_internal/lock.py", line 259, in lock_dir
+    return LockFile(os.path.join(dir_path, '.certbot.lock'))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/certbot/_internal/lock.py", line 45, in __init__
+    self.acquire()
+  File "/usr/lib/python3/dist-packages/certbot/_internal/lock.py", line 60, in acquire
+    self._lock_mechanism.acquire()
+  File "/usr/lib/python3/dist-packages/certbot/_internal/lock.py", line 110, in acquire
+    fd = filesystem.open(self._path, os.O_CREAT | os.O_WRONLY, 0o600)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/certbot/compat/filesystem.py", line 230, in open
+    return os.open(file_path, flags, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 13] Permission denied: '/etc/letsencrypt/.certbot.lock'
+2024-11-21 16:28:54,270:DEBUG:certbot._internal.log:Exiting abnormally:
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/certbot/util.py", line 179, in set_up_core_dir
+    lock_dir_until_exit(directory)
+  File "/usr/lib/python3/dist-packages/certbot/util.py", line 153, in lock_dir_until_exit
+    _LOCKS[dir_path] = lock.lock_dir(dir_path)
+                       ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/certbot/_internal/lock.py", line 259, in lock_dir
+    return LockFile(os.path.join(dir_path, '.certbot.lock'))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/certbot/_internal/lock.py", line 45, in __init__
+    self.acquire()
+  File "/usr/lib/python3/dist-packages/certbot/_internal/lock.py", line 60, in acquire
+    self._lock_mechanism.acquire()
+  File "/usr/lib/python3/dist-packages/certbot/_internal/lock.py", line 110, in acquire
+    fd = filesystem.open(self._path, os.O_CREAT | os.O_WRONLY, 0o600)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/certbot/compat/filesystem.py", line 230, in open
+    return os.open(file_path, flags, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 13] Permission denied: '/etc/letsencrypt/.certbot.lock'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/bin/certbot", line 33, in <module>
+    sys.exit(load_entry_point('certbot==2.1.0', 'console_scripts', 'certbot')())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/certbot/main.py", line 19, in main
+    return internal_main.main(cli_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/certbot/_internal/main.py", line 1727, in main
+    make_or_verify_needed_dirs(config)
+  File "/usr/lib/python3/dist-packages/certbot/_internal/main.py", line 1644, in make_or_verify_needed_dirs
+    util.set_up_core_dir(config.config_dir, constants.CONFIG_DIRS_MODE, config.strict_permissions)
+  File "/usr/lib/python3/dist-packages/certbot/util.py", line 182, in set_up_core_dir
+    raise errors.Error(PERM_ERR_FMT.format(error))
+certbot.errors.Error: The following error was encountered:
+[Errno 13] Permission denied: '/etc/letsencrypt/.certbot.lock'
+Either run as root, or set --config-dir, --work-dir, and --logs-dir to writeable paths.
+2024-11-21 16:28:54,272:ERROR:certbot._internal.log:The following error was encountered:
+[Errno 13] Permission denied: '/etc/letsencrypt/.certbot.lock'
+Either run as root, or set --config-dir, --work-dir, and --logs-dir to writeable paths.
+2024-11-21 16:29:20,680:DEBUG:certbot._internal.main:certbot version: 2.1.0
+2024-11-21 16:29:20,680:DEBUG:certbot._internal.main:Location of certbot entry point: /usr/bin/certbot
+2024-11-21 16:29:20,680:DEBUG:certbot._internal.main:Arguments: ['--nginx', '-d', 'bronenosets.duckdns.org', '-d', 'api-bronenosets.duckdns.org', '--logs-dir', 'etc']
+2024-11-21 16:29:20,680:DEBUG:certbot._internal.main:Discovered plugins: PluginsRegistry(PluginEntryPoint#manual,PluginEntryPoint#null,PluginEntryPoint#standalone,PluginEntryPoint#webroot)
+2024-11-21 16:29:20,689:DEBUG:certbot._internal.log:Root logging level set at 30
+2024-11-21 16:29:20,689:DEBUG:certbot.util:Exception was:
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/certbot/util.py", line 179, in set_up_core_dir
+    lock_dir_until_exit(directory)
+  File "/usr/lib/python3/dist-packages/certbot/util.py", line 153, in lock_dir_until_exit
+    _LOCKS[dir_path] = lock.lock_dir(dir_path)
+                       ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/certbot/_internal/lock.py", line 259, in lock_dir
+    return LockFile(os.path.join(dir_path, '.certbot.lock'))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/certbot/_internal/lock.py", line 45, in __init__
+    self.acquire()
+  File "/usr/lib/python3/dist-packages/certbot/_internal/lock.py", line 60, in acquire
+    self._lock_mechanism.acquire()
+  File "/usr/lib/python3/dist-packages/certbot/_internal/lock.py", line 110, in acquire
+    fd = filesystem.open(self._path, os.O_CREAT | os.O_WRONLY, 0o600)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/certbot/compat/filesystem.py", line 230, in open
+    return os.open(file_path, flags, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 13] Permission denied: '/etc/letsencrypt/.certbot.lock'
+2024-11-21 16:29:20,690:DEBUG:certbot._internal.log:Exiting abnormally:
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/certbot/util.py", line 179, in set_up_core_dir
+    lock_dir_until_exit(directory)
+  File "/usr/lib/python3/dist-packages/certbot/util.py", line 153, in lock_dir_until_exit
+    _LOCKS[dir_path] = lock.lock_dir(dir_path)
+                       ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/certbot/_internal/lock.py", line 259, in lock_dir
+    return LockFile(os.path.join(dir_path, '.certbot.lock'))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/certbot/_internal/lock.py", line 45, in __init__
+    self.acquire()
+  File "/usr/lib/python3/dist-packages/certbot/_internal/lock.py", line 60, in acquire
+    self._lock_mechanism.acquire()
+  File "/usr/lib/python3/dist-packages/certbot/_internal/lock.py", line 110, in acquire
+    fd = filesystem.open(self._path, os.O_CREAT | os.O_WRONLY, 0o600)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/certbot/compat/filesystem.py", line 230, in open
+    return os.open(file_path, flags, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 13] Permission denied: '/etc/letsencrypt/.certbot.lock'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/bin/certbot", line 33, in <module>
+    sys.exit(load_entry_point('certbot==2.1.0', 'console_scripts', 'certbot')())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/certbot/main.py", line 19, in main
+    return internal_main.main(cli_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/certbot/_internal/main.py", line 1727, in main
+    make_or_verify_needed_dirs(config)
+  File "/usr/lib/python3/dist-packages/certbot/_internal/main.py", line 1644, in make_or_verify_needed_dirs
+    util.set_up_core_dir(config.config_dir, constants.CONFIG_DIRS_MODE, config.strict_permissions)
+  File "/usr/lib/python3/dist-packages/certbot/util.py", line 182, in set_up_core_dir
+    raise errors.Error(PERM_ERR_FMT.format(error))
+certbot.errors.Error: The following error was encountered:
+[Errno 13] Permission denied: '/etc/letsencrypt/.certbot.lock'
+Either run as root, or set --config-dir, --work-dir, and --logs-dir to writeable paths.
+2024-11-21 16:29:20,692:ERROR:certbot._internal.log:The following error was encountered:
+[Errno 13] Permission denied: '/etc/letsencrypt/.certbot.lock'
+Either run as root, or set --config-dir, --work-dir, and --logs-dir to writeable paths.
+2024-11-21 16:30:47,844:DEBUG:certbot._internal.main:certbot version: 2.1.0
+2024-11-21 16:30:47,844:DEBUG:certbot._internal.main:Location of certbot entry point: /usr/bin/certbot
+2024-11-21 16:30:47,844:DEBUG:certbot._internal.main:Arguments: ['--nginx', '-d', 'bronenosets.duckdns.org', '-d', 'api-bronenosets.duckdns.org', '--logs-dir', 'etc']
+2024-11-21 16:30:47,844:DEBUG:certbot._internal.main:Discovered plugins: PluginsRegistry(PluginEntryPoint#manual,PluginEntryPoint#null,PluginEntryPoint#standalone,PluginEntryPoint#webroot)
+2024-11-21 16:30:47,865:DEBUG:certbot._internal.log:Root logging level set at 30
+2024-11-21 16:30:47,866:DEBUG:certbot._internal.plugins.selection:Requested authenticator nginx and installer nginx
+2024-11-21 16:30:47,866:DEBUG:certbot._internal.plugins.selection:No candidate plugin
+2024-11-21 16:30:47,866:DEBUG:certbot._internal.plugins.selection:No candidate plugin
+2024-11-21 16:30:47,867:DEBUG:certbot._internal.log:Exiting abnormally:
+Traceback (most recent call last):
+  File "/usr/bin/certbot", line 33, in <module>
+    sys.exit(load_entry_point('certbot==2.1.0', 'console_scripts', 'certbot')())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/certbot/main.py", line 19, in main
+    return internal_main.main(cli_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/certbot/_internal/main.py", line 1736, in main
+    return config.func(config, plugins)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/certbot/_internal/main.py", line 1571, in certonly
+    installer, auth = plug_sel.choose_configurator_plugins(config, plugins, "certonly")
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/certbot/_internal/plugins/selection.py", line 255, in choose_configurator_plugins
+    diagnose_configurator_problem("authenticator", req_auth, plugins)
+  File "/usr/lib/python3/dist-packages/certbot/_internal/plugins/selection.py", line 373, in diagnose_configurator_problem
+    raise errors.PluginSelectionError(msg)
+certbot.errors.PluginSelectionError: The requested nginx plugin does not appear to be installed
+2024-11-21 16:30:47,868:ERROR:certbot._internal.log:The requested nginx plugin does not appear to be installed
+2024-11-21 16:31:49,766:DEBUG:certbot._internal.main:certbot version: 2.1.0
+2024-11-21 16:31:49,766:DEBUG:certbot._internal.main:Location of certbot entry point: /usr/bin/certbot
+2024-11-21 16:31:49,766:DEBUG:certbot._internal.main:Arguments: ['--nginx', '-d', 'bronenosets.duckdns.org', '-d', 'api-bronenosets.duckdns.org', '--logs-dir', 'etc']
+2024-11-21 16:31:49,766:DEBUG:certbot._internal.main:Discovered plugins: PluginsRegistry(PluginEntryPoint#manual,PluginEntryPoint#nginx,PluginEntryPoint#null,PluginEntryPoint#standalone,PluginEntryPoint#webroot)
+2024-11-21 16:31:49,775:DEBUG:certbot._internal.log:Root logging level set at 30
+2024-11-21 16:31:49,776:DEBUG:certbot._internal.plugins.selection:Requested authenticator nginx and installer nginx
+2024-11-21 16:31:49,776:DEBUG:certbot._internal.plugins.disco:No installation (PluginEntryPoint#nginx): Could not find a usable 'nginx' binary. Ensure nginx exists, the binary is executable, and your PATH is set correctly.
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/certbot/_internal/plugins/disco.py", line 111, in prepare
+    self._initialized.prepare()
+  File "/usr/lib/python3/dist-packages/certbot_nginx/_internal/configurator.py", line 194, in prepare
+    raise errors.NoInstallationError(
+certbot.errors.NoInstallationError: Could not find a usable 'nginx' binary. Ensure nginx exists, the binary is executable, and your PATH is set correctly.
+2024-11-21 16:31:49,777:DEBUG:certbot._internal.plugins.selection:No candidate plugin
+2024-11-21 16:31:49,777:DEBUG:certbot._internal.plugins.selection:No candidate plugin
+2024-11-21 16:31:49,777:DEBUG:certbot._internal.log:Exiting abnormally:
+Traceback (most recent call last):
+  File "/usr/bin/certbot", line 33, in <module>
+    sys.exit(load_entry_point('certbot==2.1.0', 'console_scripts', 'certbot')())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/certbot/main.py", line 19, in main
+    return internal_main.main(cli_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/certbot/_internal/main.py", line 1736, in main
+    return config.func(config, plugins)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/certbot/_internal/main.py", line 1571, in certonly
+    installer, auth = plug_sel.choose_configurator_plugins(config, plugins, "certonly")
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/certbot/_internal/plugins/selection.py", line 255, in choose_configurator_plugins
+    diagnose_configurator_problem("authenticator", req_auth, plugins)
+  File "/usr/lib/python3/dist-packages/certbot/_internal/plugins/selection.py", line 373, in diagnose_configurator_problem
+    raise errors.PluginSelectionError(msg)
+certbot.errors.PluginSelectionError: The nginx plugin is not working; there may be problems with your existing configuration.
+The error was: NoInstallationError("Could not find a usable 'nginx' binary. Ensure nginx exists, the binary is executable, and your PATH is set correctly.")
+2024-11-21 16:31:49,778:ERROR:certbot._internal.log:The nginx plugin is not working; there may be problems with your existing configuration.
+The error was: NoInstallationError("Could not find a usable 'nginx' binary. Ensure nginx exists, the binary is executable, and your PATH is set correctly.")
+2024-11-21 16:32:31,911:DEBUG:certbot._internal.main:certbot version: 2.1.0
+2024-11-21 16:32:31,911:DEBUG:certbot._internal.main:Location of certbot entry point: /usr/bin/certbot
+2024-11-21 16:32:31,911:DEBUG:certbot._internal.main:Arguments: ['--nginx', '-d', 'bronenosets.duckdns.org', '-d', 'api-bronenosets.duckdns.org', '--logs-dir', 'etc']
+2024-11-21 16:32:31,911:DEBUG:certbot._internal.main:Discovered plugins: PluginsRegistry(PluginEntryPoint#manual,PluginEntryPoint#nginx,PluginEntryPoint#null,PluginEntryPoint#standalone,PluginEntryPoint#webroot)
+2024-11-21 16:32:31,920:DEBUG:certbot._internal.log:Root logging level set at 30
+2024-11-21 16:32:31,920:DEBUG:certbot._internal.plugins.selection:Requested authenticator nginx and installer nginx
+2024-11-21 16:32:31,921:DEBUG:certbot._internal.plugins.disco:No installation (PluginEntryPoint#nginx): Could not find a usable 'nginx' binary. Ensure nginx exists, the binary is executable, and your PATH is set correctly.
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/certbot/_internal/plugins/disco.py", line 111, in prepare
+    self._initialized.prepare()
+  File "/usr/lib/python3/dist-packages/certbot_nginx/_internal/configurator.py", line 194, in prepare
+    raise errors.NoInstallationError(
+certbot.errors.NoInstallationError: Could not find a usable 'nginx' binary. Ensure nginx exists, the binary is executable, and your PATH is set correctly.
+2024-11-21 16:32:31,921:DEBUG:certbot._internal.plugins.selection:No candidate plugin
+2024-11-21 16:32:31,922:DEBUG:certbot._internal.plugins.selection:No candidate plugin
+2024-11-21 16:32:31,922:DEBUG:certbot._internal.log:Exiting abnormally:
+Traceback (most recent call last):
+  File "/usr/bin/certbot", line 33, in <module>
+    sys.exit(load_entry_point('certbot==2.1.0', 'console_scripts', 'certbot')())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/certbot/main.py", line 19, in main
+    return internal_main.main(cli_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/certbot/_internal/main.py", line 1736, in main
+    return config.func(config, plugins)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/certbot/_internal/main.py", line 1571, in certonly
+    installer, auth = plug_sel.choose_configurator_plugins(config, plugins, "certonly")
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/certbot/_internal/plugins/selection.py", line 255, in choose_configurator_plugins
+    diagnose_configurator_problem("authenticator", req_auth, plugins)
+  File "/usr/lib/python3/dist-packages/certbot/_internal/plugins/selection.py", line 373, in diagnose_configurator_problem
+    raise errors.PluginSelectionError(msg)
+certbot.errors.PluginSelectionError: The nginx plugin is not working; there may be problems with your existing configuration.
+The error was: NoInstallationError("Could not find a usable 'nginx' binary. Ensure nginx exists, the binary is executable, and your PATH is set correctly.")
+2024-11-21 16:32:31,923:ERROR:certbot._internal.log:The nginx plugin is not working; there may be problems with your existing configuration.
+The error was: NoInstallationError("Could not find a usable 'nginx' binary. Ensure nginx exists, the binary is executable, and your PATH is set correctly.")

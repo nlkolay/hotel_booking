@@ -6,7 +6,7 @@ Dev run:
 uvicorn app.main:app --reload
 
 SSL certs init:
-docker-compose run --rm certbot certonly --nginx -d bronenosets.duckdns.org
+docker-compose run --rm certbot certonly --nginx -d bronenosets.duckdns.org -d api-bronenosets.duckdns.org
 
 для чего нужен каждый из файлов
 
