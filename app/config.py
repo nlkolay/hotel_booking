@@ -50,6 +50,9 @@ class Settings(BaseSettings):
 
     FLOWER_UNAUTHENTICATED_API: bool
 
+    FLOWER_USER: str
+    FLOWER_PASSWORD: str
+
     # Со 2 версии Pydantic, class Config был заменен на атрибут model_config
     # class Config:
     #     env_file = ".env"

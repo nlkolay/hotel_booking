@@ -4,6 +4,7 @@ services:
       context: .
       dockerfile: "Dockerfile.nginx"
     container_name: booking_nginx
+    env_file: .env-prod
     ports:
       - "8080:80"
       - "8443:443"
@@ -64,7 +65,7 @@ services:
     #   - 8000:8000
 
   celery:
-    image: booking_backend
+    image: booking_backend:latest
     build:
       context: .
       dockerfile: Dockerfile
