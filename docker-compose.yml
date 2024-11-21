@@ -15,7 +15,7 @@ services:
       - booking
     volumes:
       - nginx_secrets:/etc/letsencrypt
-    restart: unless-stopped
+    # restart: unless-stopped
 
   db:
     image: postgres:15-alpine
@@ -90,6 +90,7 @@ services:
       - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--log.level=warn'
     # ports:
     #   - "9090:9090"  # Expose Prometheus on port 9090
     restart: unless-stopped
