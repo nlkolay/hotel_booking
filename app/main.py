@@ -169,7 +169,15 @@ admin.add_view(RoomsAdmin)
 app.mount("/static", StaticFiles(directory="app/static"), "static")
 
 # TODO
+# dao
 # +front,
 # +cash,
 # +test,
-# prod
+# +prod
+#   entrypoint.sh
+#   ssl на своем сервере
+#   logout с фронта не работает
+#   (разобраться с cors и куки, привести к единообразию)
+#   grafana dashboard сервера/проекта
+#   добавить роли юзеров админки sqladmin -
+#   https://stepik.org/lesson/926340/step/9?discussion=7562112&reply=7740346&unit=932223

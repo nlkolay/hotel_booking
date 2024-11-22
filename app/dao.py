@@ -256,8 +256,7 @@ class BookingDAO:
         return result.scalar_one()
 
 # TODO:
-# вырубить инфо лог алхимии хз как
-# add_booking log не работает
+# +вырубить инфо лог алхимии
 #
 # непонятно как это сделать:
 # AttributeError: 'classmethod' object has no attribute 'execute'
