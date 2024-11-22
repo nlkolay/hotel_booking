@@ -1,9 +1,14 @@
 # Аутентификация админки sqladmin
 # TODO: добавить роли юзеров - https://stepik.org/lesson/926340/step/9?discussion=7562112&reply=7740346&unit=932223
 from app.config import settings
-from app.dependencies import authenticate_user, create_access_token, get_current_user
+from app.dependencies import (
+    authenticate_user,
+    create_access_token,
+    get_current_user_role,
+)
 from fastapi import HTTPException, Request
 from fastapi.responses import RedirectResponse
+from jose import jwt
 from sqladmin.authentication import AuthenticationBackend
 
 
@@ -15,7 +20,8 @@ class AdminAuth(AuthenticationBackend):
         user = await authenticate_user(email, password)
         if user:
             access_token = create_access_token({"sub": str(user.email)})
-            request.session.update({"token": access_token})
+            if jwt.decode(access_token, settings.SECRET_KEY)["role"] == "admin":
+                request.session.update({"token": access_token})
 
         return True
 
@@ -25,7 +31,11 @@ class AdminAuth(AuthenticationBackend):
 
     async def authenticate(self, request: Request) -> bool | RedirectResponse:
         try:
-            await get_current_user(request)
+            role = await get_current_user_role(request)
+            if role != "admin":
+                return RedirectResponse(
+                    request.url_for("admin:login"), status_code=302
+                )
         except HTTPException as exc:
             if exc.status_code == 401:
                 return RedirectResponse(request.url_for("admin:login"), status_code=302)

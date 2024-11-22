@@ -6,7 +6,11 @@ from email_validator import EmailNotValidError, validate_email
 from fastapi import APIRouter, Depends, Request, status
 
 from app.dao import UserDAO
-from app.dependencies import authenticate_user, create_access_token, get_current_user
+from app.dependencies import (
+    authenticate_user,
+    create_access_token,
+    get_current_user,
+)
 from app.exceptions import EmailAlreadyUsed, EmailNotValid, InvalidCredentials
 from app.schemas import UserBase, UserCreate, UserResponse
 from app.utils import pwd_context
@@ -17,7 +21,7 @@ router = APIRouter()
 @router.post("/register")
 async def register(user: UserCreate) -> dict:
     try:
-        valid = validate_email(user.email, check_deliverability=False)
+        valid = validate_email(user.email, check_deliverability=True)  # False for dev
         email = valid.normalized
     except EmailNotValidError:
         raise EmailNotValid

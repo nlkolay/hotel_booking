@@ -6,11 +6,11 @@ from os.path import isfile
 from app.config import settings
 from app.tasks.celery_app import celery
 from app.tasks.dao import TaskDAO
-from app.tasks.email_templates import create_booking_reminder_template
+from app.tasks.tasks import send_booking_confirmation_email
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 # Настройка базы данных
-DATABASE_URL = settings.DATABASE_URL  # Замените на вашу строку подключения
+DATABASE_URL = settings.DATABASE_URL
 engine = create_async_engine(
     DATABASE_URL
 )  # , poolclass=NullPool) при новых ошибках (см внизу)
@@ -27,18 +27,23 @@ def periodic_task(days_left: int):  # Обход синхронности сел
 
 async def run_periodic_task(days_left: int):
     async with AsyncSession(engine):
-        # Получаем пользователей с запланированным заездом на завтра
+        # Получаем пользователей с запланированным заездом на days_left
         bookings = await TaskDAO.get_booking_by_days_left(days_left)
         if bookings is not None:
             for booking in bookings:
-                path = f"app/tmp/{booking.id}.eml"
-                if not (isfile(path)):
-                    with open(f"app/tmp/{booking.id}.eml", "wb") as f:
-                        email_to = await TaskDAO.get_email_by_booking(booking)
-                        msg_content = create_booking_reminder_template(
-                            booking, email_to
-                        )
-                        f.write(msg_content)
+                # Отправляем уведомление на почту
+                await send_booking_confirmation_email(booking)
+                # Обновляем статус бронирования
+                # await TaskDAO.update_booking_status(booking, "reminder_sent")
+                # Сохраняем в файл
+                # path = f"app/tmp/{booking.id}.eml"
+                # if not (isfile(path)):
+                #     with open(f"app/tmp/{booking.id}.eml", "wb") as f:
+                #         email_to = await TaskDAO.get_email_by_booking(booking)
+                #         msg_content = create_booking_reminder_template(
+                #             booking, email_to
+                #         )
+                #         f.write(msg_content)
 
 
 """ Как правильно получать ответ в таске, если нужно обращаться к БД и в ответ приходит корутина?
@@ -59,5 +64,6 @@ async with async_session_maker_nullpool() as session:
 
 users = asyncio.run(BookingDAO.get_bookings_by_date_from(day_to_enter))
 
-Оно работает, но сдается мне, что где то подвох. В комментарии на прошлом шаге написано, что с asyncio.run  будут проблемы, но теперь движок с NullPool. Этого достаточно или вообще все не так?
+Оно работает, но сдается мне, что где то подвох. В комментарии на прошлом шаге написано,
+что с asyncio.run  будут проблемы, но теперь движок с NullPool. Этого достаточно или вообще все не так?
  """

@@ -48,6 +48,8 @@ class Settings(BaseSettings):
 
     BETTER_STACK_TOKEN: str
 
+    SENTRY_DSN: str
+
     FLOWER_UNAUTHENTICATED_API: bool
 
     FLOWER_USER: str

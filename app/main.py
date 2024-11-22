@@ -8,6 +8,7 @@
 import time
 from contextlib import asynccontextmanager
 
+import sentry_sdk
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
@@ -32,17 +33,16 @@ from app.pages.router import router as router_pages
 from app.routers import auth, bookings, hotels, prometheus, rooms, utils
 
 # For logging mgmt (ru 403):
-# import sentry_sdk
-# sentry_sdk.init(
-#     dsn=settings.SENTRY_DSN,
-#     # Set traces_sample_rate to 1.0 to capture 100%
-#     # of transactions for tracing.
-#     traces_sample_rate=1.0,
-#     # Set profiles_sample_rate to 1.0 to profile 100%
-#     # of sampled transactions.
-#     # We recommend adjusting this value in production.
-#     profiles_sample_rate=1.0,
-# )
+sentry_sdk.init(
+    dsn=settings.SENTRY_DSN,
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for tracing.
+    traces_sample_rate=1.0,
+    # Set profiles_sample_rate to 1.0 to profile 100%
+    # of sampled transactions.
+    # We recommend adjusting this value in production.
+    profiles_sample_rate=1.0,
+)
 
 # Parallel with startup :
 # async def get_cache():
@@ -126,10 +126,10 @@ async def log_requests(request: Request, call_next):
     return response
 
 # If behind a proxy, configure trusted hosts
-# app.add_middleware(
-#     TrustedHostMiddleware,
-#     allowed_hosts=origins
-# )
+app.add_middleware(
+    TrustedHostMiddleware,
+    allowed_hosts=origins
+)
 
 instrumentator = Instrumentator(
     should_group_status_codes=False,
@@ -179,5 +179,4 @@ app.mount("/static", StaticFiles(directory="app/static"), "static")
 #   logout с фронта не работает
 #   (разобраться с cors и куки, привести к единообразию)
 #   grafana dashboard сервера/проекта
-#   добавить роли юзеров админки sqladmin -
-#   https://stepik.org/lesson/926340/step/9?discussion=7562112&reply=7740346&unit=932223
+#   +добавить роли юзеров админки sqladmin

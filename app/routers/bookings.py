@@ -16,6 +16,7 @@ from app.services import BookingService
 
 router = APIRouter()
 
+
 @router.post("/create", status_code=status.HTTP_201_CREATED)
 # @version(1)
 async def new_booking(
@@ -59,9 +60,8 @@ async def list_bookings(
 @router.delete("/{booking_id}", status_code=status.HTTP_204_NO_CONTENT)
 # @version(1)
 async def delete_booking(
-    booking_id: int,
-    current_user: Users = Depends(get_current_user)
-    ) -> None:
+    booking_id: int, current_user: Users = Depends(get_current_user)
+) -> None:
     booking = await BookingDAO.get_booking_by_id(booking_id)
     if booking is None or booking.user_id != current_user.id:
         raise BookingNotFound

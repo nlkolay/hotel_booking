@@ -2,10 +2,11 @@ import csv
 import io
 from typing import List
 
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.database import AsyncSessionLocal  # Импортируем асинхронную сессию
+from app.dependencies import get_current_user_role
 from app.models import Bookings, Hotels, Rooms
 from app.schemas import BookingBase, HotelBase, RoomBase
 
@@ -64,13 +65,17 @@ def parse_csv_file(file: UploadFile, model_type: str):
 
 @router.post("/hotels")
 async def upload_hotels(
-    file: UploadFile = File(...)
+    file: UploadFile = File(...),
+    current_user_role = Depends(get_current_user_role),
 ):
     """
     Загрузка отелей из CSV
     """
+    if current_user_role != "admin":
+        raise HTTPException(status_code=403, detail="Недостаточно прав.")
+
     if not file.filename.endswith('.csv'):
-        raise HTTPException(status_code=400, detail="Файл должен быть CSV")
+        raise HTTPException(status_code=400, detail="Файл должен быть CSV.")
 
     try:
         # Используем асинхронную сессию
@@ -100,8 +105,11 @@ async def upload_hotels(
 
 @router.post("/rooms")
 async def upload_rooms(
-    file: UploadFile = File(...)
+    file: UploadFile = File(...),
+    current_user_role = Depends(get_current_user_role),
 ):
+    if current_user_role != "admin":
+        raise HTTPException(status_code=403, detail="Недостаточно прав.")
     """
     Загрузка номеров из CSV
     """
@@ -137,8 +145,11 @@ async def upload_rooms(
 
 @router.post("/bookings")
 async def upload_bookings(
-    file: UploadFile = File(...)
+    file: UploadFile = File(...),
+    current_user_role = Depends(get_current_user_role),
 ):
+    if current_user_role != "admin":
+        raise HTTPException(status_code=403, detail="Недостаточно прав.")
     """
     Загрузка бронирований из CSV.
     ВНИМАНИЕ!

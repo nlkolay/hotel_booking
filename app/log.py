@@ -10,6 +10,8 @@ logger = logging.getLogger()
 
 handler = logging.StreamHandler() # To terminal or Sentry
 
+# handler = LogtailHandler(source_token=settings.SENTRY_DSN) #  To Sentry
+
 # handler = LogtailHandler(source_token=settings.BETTER_STACK_TOKEN) #  To Better Stack
 logger.handlers = []
 

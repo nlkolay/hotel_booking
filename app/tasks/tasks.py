@@ -6,6 +6,7 @@ from pathlib import Path
 from app.config import settings
 from app.models import Bookings
 from app.tasks.celery_app import celery
+from app.tasks.dao import TaskDAO
 from app.tasks.email_templates import create_booking_confirmation_template
 from PIL import Image
 from pydantic import EmailStr
@@ -26,8 +27,8 @@ def process_pic(
 @celery.task
 def send_booking_confirmation_email(
     booking: Bookings,
-    email_to: EmailStr,
 ):
+    email_to: EmailStr = TaskDAO.get_email_by_booking(booking)
     msg_content = create_booking_confirmation_template(booking, email_to)
     with smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT) as server:
         server.login(settings.SMTP_USER, settings.SMTP_PASS)

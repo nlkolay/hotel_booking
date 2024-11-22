@@ -34,7 +34,10 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
         expire = datetime.now(timezone.utc) + timedelta(
             minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
         )
-    to_encode.update({"exp": expire})
+    role = "user"
+    if data.get("email") == settings.SMTP_USER:
+        role = "admin"
+    to_encode.update({"exp": expire, "role": role})
     encoded_jwt = jwt.encode(
         to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM
     )
@@ -47,6 +50,27 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
 #         raise NotLoggedIn
 #     return token
 
+
+async def get_current_user_role(request: Request) -> Optional[str]:
+    # token: Token = await get_token(request)
+    token: str = request.session.get("token")
+    if token is None:
+        raise NotLoggedIn
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, settings.ALGORITHM)
+        email: EmailStr = payload.get("sub")
+        role: str = payload.get("role")
+        if email is None:
+            raise InvalidCredentials
+        query = select(Users).where(Users.email == email)
+        async with AsyncSessionLocal() as session:
+            result = await session.execute(query)
+        user = result.scalar_one_or_none()
+        if user is None:
+            raise InvalidCredentials
+    except JWTError:
+        raise InvalidCredentials
+    return role
 
 async def get_current_user(request: Request) -> Optional[UserResponse]:
     # token: Token = await get_token(request)
