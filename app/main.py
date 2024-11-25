@@ -180,3 +180,4 @@ app.mount("/static", StaticFiles(directory="app/static"), "static")
 #   (разобраться с cors и куки, привести к единообразию)
 #   grafana dashboard сервера/проекта
 #   +добавить роли юзеров админки sqladmin
+#   test all that ^
