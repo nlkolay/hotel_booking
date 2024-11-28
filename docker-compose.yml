@@ -1,30 +1,28 @@
 services:
   nginx:
-    build:
-      context: .
-      dockerfile: "Dockerfile.nginx"
+    image: nginx:stable-alpine-slim
     container_name: booking_nginx
     env_file: .env-prod
     ports:
-      - "8080:80"
-      - "8443:443"
+      - "80:80"
+      - "443:443"
     links:
       - booking
     depends_on:
       - booking
-      # - certbot
+      - certbot
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
-      # - ./html:/app/static/html  # Папка для статических файлов
-      # - nginx_secrets:/etc/letsencrypt
+      - ./app/static:/app/static  # Папка для статических файлов
+      - nginx_secrets:/etc/letsencrypt
     # restart: unless-stopped
 
-  # certbot:
-  #   image: certbot/certbot
-  #   volumes:
-  #     - nginx_secrets:/etc/letsencrypt  # Папка для хранения сертификатов
-  #     - ./nginx.conf:/etc/nginx/nginx.conf  # Путь к конфигурации Nginx
-  #   entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - nginx_secrets:/etc/letsencrypt  # Папка для хранения сертификатов
+      - ./nginx.conf:/etc/nginx/nginx.conf  # Путь к конфигурации Nginx
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
   db:
     image: postgres:15-alpine
