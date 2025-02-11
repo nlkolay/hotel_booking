@@ -161,7 +161,39 @@ admin.add_view(RoomsAdmin)
 app.mount("/static", StaticFiles(directory="app/static"), "static")
 
 # TODO
+# -Монолит вместо микросервисов,
 # +front,
-# +cash,
-# +test,
-# prod
+# -cash:
+#  -Кэширование результатов поиска отелей и блокировка мест на время бронирования (предотвращение overbooking).
+#  -Для каталога отелей применял TTL (например, 5 минут) + "ленивое" обновление кэша.
+#  -инвалидацию кэша при изменении данных
+# async def update_hotel(hotel_id):
+#     await database.execute(update_hotel_query)
+#     await redis.delete(f"hotel:{hotel_id}")  # Сброс кэша
+#  -saga
+# # Сервис бронирования
+# async def create_booking(booking_data: BookingSchema):
+#     async with db_session() as session:
+#         # Локальная транзакция: бронирование
+#         booking = await Booking.create(session, booking_data)
+#         await session.commit()
+        
+#         # Публикация события (через RabbitMQ/Kafka)
+#         await message_broker.publish(
+#             "BookingCreated", 
+#             {"booking_id": booking.id, "user_id": booking.user_id}
+#         )
+#     return booking
+
+# # Компенсирующая транзакция
+# async def cancel_booking(booking_id: int):
+#     async with db_session() as session:
+#         booking = await Booking.get(session, booking_id)
+#         booking.status = "canceled"
+#         await Hotel.update_free_rooms(session, booking.hotel_id, +1)
+#         await session.commit(),
+#  -отслеживания состояния Saga
+#  -Ручная обработка ошибок
+# test,
+# prod:
+#  -балансировка нагрузки nginx+масштабирование
